@@ -4,7 +4,7 @@ class Main {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            println("SA")
+            println("Test Commit!")
         }
     }
 }

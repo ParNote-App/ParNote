@@ -10,7 +10,7 @@
 ---
 
 #### Project Status
-Pano is still under heavy development. There can be breaking changes but we're trying to keep them as minimum as possible.
+ParNote is still under heavy development. There can be breaking changes but we're trying to keep them as minimum as possible.
 
 #### Prerequisites
 JDK 8+ 

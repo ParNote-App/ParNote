@@ -1,0 +1,9 @@
+.gradle
+.idea
+.vertx
+build
+.directory
+
+config.json
+
+/*.jar

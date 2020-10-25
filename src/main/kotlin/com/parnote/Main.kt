@@ -1,11 +1,9 @@
 package com.parnote
 
+import com.parnote.db.DatabaseManager
 import com.parnote.di.component.ApplicationComponent
 import com.parnote.di.component.DaggerApplicationComponent
-import com.parnote.di.module.ConfigManagerModule
-import com.parnote.di.module.LoggerModule
-import com.parnote.di.module.RouterModule
-import com.parnote.di.module.VertxModule
+import com.parnote.di.module.*
 import com.parnote.util.ConfigManager
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
@@ -23,6 +21,7 @@ class Main : AbstractVerticle() {
         private val mOptions = VertxOptions()
         private val mVertx = Vertx.vertx(mOptions)
         private val mLogger = LoggerFactory.getLogger("ParNote")
+        private val mConfigManager = ConfigManager(mLogger, mVertx)
 
         private val mURLClassLoader = Main::class.java.classLoader as URLClassLoader
         private val mMode by lazy {
@@ -56,7 +55,8 @@ class Main : AbstractVerticle() {
                 .vertxModule(VertxModule(mVertx))
                 .loggerModule(LoggerModule(mLogger))
                 .routerModule(RouterModule(mVertx))
-                .configManagerModule(ConfigManagerModule(ConfigManager(mLogger, mVertx)))
+                .configManagerModule(ConfigManagerModule(mConfigManager))
+                .databaseManagerModule(DatabaseManagerModule(DatabaseManager(mVertx, mLogger, mConfigManager)))
                 .build()
         }
 

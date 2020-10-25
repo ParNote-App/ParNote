@@ -18,6 +18,6 @@ interface SchemeVersionDao : Dao<SchemeVersion> {
 
     fun getLastSchemeVersion(
         sqlConnection: SQLConnection,
-        handler: (schemeVersion: SchemeVersion?) -> Unit
+        handler: (schemeVersion: SchemeVersion?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

@@ -29,25 +29,28 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
         """
         ) {
             if (it.succeeded())
-                sqlConnection.queryWithParams(
-                    """
-                        SELECT COUNT(`key`) FROM `${databaseManager.getTablePrefix() + tableName}` where `key` = ?
-            """.trimIndent(),
-                    JsonArray().add(DATABASE_SCHEME_VERSION.toString())
-                ) {
-                    if (it.failed() || it.result().results[0].getInteger(0) != 0)
-                        handler.invoke(it)
-                    else
-                        sqlConnection.updateWithParams(
-                            """
-                        INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`key`, `extra`) VALUES (?, ?)
-            """.trimIndent(),
-                            JsonArray()
-                                .add(DATABASE_SCHEME_VERSION.toString())
-                                .add(DATABASE_SCHEME_VERSION_INFO)
-                        ) {
-                            handler.invoke(it)
+                getLastSchemeVersion(sqlConnection) { schemeVersion, asyncResult ->
+                    if (schemeVersion == null)
+                        add(
+                            sqlConnection,
+                            SchemeVersion(DATABASE_SCHEME_VERSION.toString(), DATABASE_SCHEME_VERSION_INFO)
+                        ) { _, asyncResultAdd ->
+                            handler.invoke(asyncResultAdd)
                         }
+                    else {
+                        val databaseVersion = schemeVersion.key.toIntOrNull() ?: 0
+
+                        if (databaseVersion == 0)
+                            add(
+                                sqlConnection,
+                                SchemeVersion(DATABASE_SCHEME_VERSION.toString(), DATABASE_SCHEME_VERSION_INFO)
+                            ) { _, asyncResultAdd ->
+                                handler.invoke(asyncResultAdd)
+                            }
+                        else
+                            handler.invoke(asyncResult)
+                    }
+
                 }
             else
                 handler.invoke(it)
@@ -83,7 +86,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
 
     override fun getLastSchemeVersion(
         sqlConnection: SQLConnection,
-        handler: (schemeVersion: SchemeVersion?) -> Unit
+        handler: (schemeVersion: SchemeVersion?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT MAX(`key`) FROM `${databaseManager.getTablePrefix() + tableName}`"
 
@@ -91,12 +94,12 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
             query
         ) { queryResult ->
             if (queryResult.failed()) {
-                handler.invoke(null)
+                handler.invoke(null, queryResult)
 
                 return@query
             }
 
-            handler.invoke(SchemeVersion(queryResult.result().results[0].getString(0), null))
+            handler.invoke(SchemeVersion(queryResult.result().results[0].getString(0), null), queryResult)
         }
     }
 }

@@ -35,7 +35,7 @@ class DatabaseManager(
     private fun checkMigration() {
         createConnection { connection, _ ->
             if (connection != null) {
-                mDatabase.schemeVersionDao.getLastSchemeVersion(getSQLConnection(connection)) { schemeVersion ->
+                mDatabase.schemeVersionDao.getLastSchemeVersion(getSQLConnection(connection)) { schemeVersion, _ ->
                     if (schemeVersion == null)
                         initDatabase(connection)
                     else {

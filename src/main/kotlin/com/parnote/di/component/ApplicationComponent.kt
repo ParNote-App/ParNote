@@ -1,6 +1,7 @@
 package com.parnote.di.component
 
 import com.parnote.Main
+import com.parnote.di.module.ConfigManagerModule
 import com.parnote.di.module.LoggerModule
 import com.parnote.di.module.RouterModule
 import com.parnote.di.module.VertxModule
@@ -13,6 +14,7 @@ import javax.inject.Singleton
         (VertxModule::class),
         (LoggerModule::class),
         (RouterModule::class),
+        (ConfigManagerModule::class)
     ]
 )
 interface ApplicationComponent {

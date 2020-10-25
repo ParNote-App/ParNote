@@ -2,9 +2,11 @@ package com.parnote
 
 import com.parnote.di.component.ApplicationComponent
 import com.parnote.di.component.DaggerApplicationComponent
+import com.parnote.di.module.ConfigManagerModule
 import com.parnote.di.module.LoggerModule
 import com.parnote.di.module.RouterModule
 import com.parnote.di.module.VertxModule
+import com.parnote.util.ConfigManager
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -54,6 +56,7 @@ class Main : AbstractVerticle() {
                 .vertxModule(VertxModule(mVertx))
                 .loggerModule(LoggerModule(mLogger))
                 .routerModule(RouterModule(mVertx))
+                .configManagerModule(ConfigManagerModule(ConfigManager(mLogger, mVertx)))
                 .build()
         }
 

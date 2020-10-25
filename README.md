@@ -27,7 +27,7 @@ cd ParNote
 ##### Compile & Run & Debug
 
 ```bash
-./gradlew run
+./gradlew vertxDebug
 ```
 
 ## Contributing

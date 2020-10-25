@@ -1,9 +1,7 @@
 package com.parnote.db.entity
 
 import com.parnote.ErrorCode
-import com.parnote.Main
 import com.parnote.db.DaoImpl
-import com.parnote.db.DatabaseManager
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import com.parnote.db.dao.SchemeVersionDao
@@ -14,16 +12,8 @@ import com.parnote.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
-import javax.inject.Inject
 
 class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : DaoImpl(), SchemeVersionDao {
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
-
-    init {
-        Main.getComponent().inject(this)
-    }
 
     override fun init(
         sqlConnection: SQLConnection

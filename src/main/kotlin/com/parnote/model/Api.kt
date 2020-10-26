@@ -1,6 +1,7 @@
 package com.parnote.model
 
 import com.beust.klaxon.JsonObject
+import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 
 abstract class Api : Route() {
@@ -39,4 +40,17 @@ abstract class Api : Route() {
             )
         }
     }
+
+    override fun getHandler() = Handler<RoutingContext> { context ->
+        val response = context.response()
+
+        response
+            .putHeader("content-type", "application/json; charset=utf-8")
+
+        getHandler(context) { result ->
+            getResultHandler(result, context)
+        }
+    }
+
+    abstract fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit)
 }

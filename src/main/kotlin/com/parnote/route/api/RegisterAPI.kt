@@ -14,7 +14,7 @@ import javax.inject.Inject
  */
 
 class RegisterAPI : Api() {
-    override val routes = arrayListOf("api/auth/registerAPI")
+    override val routes = arrayListOf("/api/auth/registerAPI")
 
     override val routeType = RouteType.POST //Yapilacak islemin methodunu belirtiyorsun
 

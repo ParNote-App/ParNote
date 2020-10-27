@@ -122,7 +122,7 @@ class RegisterAPI : Api() {
             return
         }
 
-        if (!username.matches(Regex("^[a-zA-Z0-9]+\$"))) {
+        if (!username.matches(Regex("^[a-zA-Z0-9_]+\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_INVALID))
             return
         }

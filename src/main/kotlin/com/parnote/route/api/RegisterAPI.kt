@@ -67,6 +67,11 @@ class RegisterAPI : Api() {
     fun validateForm(name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
                      errorHandler: (result: Result) -> Unit, successHandler: () -> Unit) {
 
+        if (name.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_EMPTY))
+            return
+        }
+
         if (name.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SHORT))
             return
@@ -74,6 +79,11 @@ class RegisterAPI : Api() {
 
         if (name.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_LONG))
+            return
+        }
+
+        if (surname.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_EMPTY))
             return
         }
 
@@ -117,9 +127,19 @@ class RegisterAPI : Api() {
             return
         }
 
+        if (email.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_EMPTY))
+            return
+        }
+
         if (!email.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {//email kosullarimiza uymuyor
             errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_INVALID)) //Error donuyoruz
             return //error handleri bitirmek icin
+        }
+
+        if (password.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_EMPTY))
+            return
         }
 
         if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {

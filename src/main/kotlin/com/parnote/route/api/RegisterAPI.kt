@@ -67,9 +67,31 @@ class RegisterAPI : Api() {
     fun validateForm(name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
                      errorHandler: (result: Result) -> Unit, successHandler: () -> Unit) {
 
-        //if (name)
+        if (name.length < 2 && surname.length < 2) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SHORT))
+            return
+        }
 
-        //if (surname)
+        if (name.length > 32 && surname.length > 32) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_LONG))
+            return
+        }
+
+        if (surname.length < 2) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_SHORT))
+            return
+        }
+
+        if (surname.length > 32) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_LONG))
+            return
+        }
+
+        if (!name.matches(Regex("^[A-Za-z0-9_-]*$")) && !surname.matches(Regex("^[A-Za-z0-9_-]*$"))) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SURNAME_INVALID))
+            return
+        }
+
 
         if (username.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_EMPTY))
@@ -96,7 +118,9 @@ class RegisterAPI : Api() {
             return //error handleri bitirmek icin
         }
 
-//      if (password) md5 e cok takilma
+        if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_INVALID))
+        }
 
         if (termsBox == false) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NOT_ACCEPTED_TERMS))

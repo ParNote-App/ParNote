@@ -4,8 +4,8 @@ import com.parnote.db.DaoImpl
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import com.parnote.db.dao.SchemeVersionDao
+import com.parnote.db.model.SchemeVersion
 import com.parnote.model.Result
-import com.parnote.model.SchemeVersion
 import com.parnote.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray

@@ -1,8 +1,8 @@
 package com.parnote.db.dao
 
 import com.parnote.db.Dao
+import com.parnote.db.model.SchemeVersion
 import com.parnote.model.Result
-import com.parnote.model.SchemeVersion
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 

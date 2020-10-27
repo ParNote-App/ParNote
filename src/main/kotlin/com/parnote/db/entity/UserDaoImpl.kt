@@ -3,6 +3,7 @@ package com.parnote.db.entity
 import com.parnote.db.DaoImpl
 import com.parnote.db.dao.UserDao
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
 
 class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao {
@@ -29,4 +30,20 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(it)
             }
         }
+
+    override fun isEmailExists(
+        email: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(email) FROM `${databaseManager.getTablePrefix() + tableName}` where email = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(email)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

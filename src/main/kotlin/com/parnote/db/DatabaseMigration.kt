@@ -1,25 +1,29 @@
 package com.parnote.db
 
+import com.parnote.Main
 import com.parnote.db.model.SchemeVersion
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
+import javax.inject.Inject
 
-abstract class DatabaseMigration(val databaseManager: DatabaseManager) {
-    abstract val handlers: List<(
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection>
+abstract class DatabaseMigration {
+    abstract val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection>
 
     abstract val FROM_SCHEME_VERSION: Int
     abstract val SCHEME_VERSION: Int
     abstract val SCHEME_VERSION_INFO: String
 
+    init {
+        Main.getComponent().inject(this)
+    }
+
+    @Inject
+    lateinit var databaseManager: DatabaseManager
+
     fun isMigratable(version: Int) = version == FROM_SCHEME_VERSION
 
     fun migrate(
         sqlConnection: SQLConnection,
-        tablePrefix: String
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit = { handler ->
         var currentIndex = 0
 
@@ -37,7 +41,7 @@ abstract class DatabaseMigration(val databaseManager: DatabaseManager) {
             }
 
             if (currentIndex <= handlers.lastIndex)
-                handlers[currentIndex].invoke(sqlConnection, tablePrefix, localHandler)
+                handlers[currentIndex].invoke(sqlConnection, localHandler)
         }
 
         invoke()

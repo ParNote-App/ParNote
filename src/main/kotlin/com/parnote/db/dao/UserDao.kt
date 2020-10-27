@@ -18,4 +18,11 @@ interface UserDao : Dao<User> {
             sqlConnection: SQLConnection,
             handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun isLoginCorrect(
+            usernameOrEmail: String,
+            password: String,
+            sqlConnection: SQLConnection,
+            handler: (loginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

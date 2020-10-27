@@ -67,12 +67,12 @@ class RegisterAPI : Api() {
     fun validateForm(name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
                      errorHandler: (result: Result) -> Unit, successHandler: () -> Unit) {
 
-        if (name.length < 2 && surname.length < 2) {
+        if (name.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SHORT))
             return
         }
 
-        if (name.length > 32 && surname.length > 32) {
+        if (name.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_LONG))
             return
         }

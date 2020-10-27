@@ -12,7 +12,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(16) NOT NULL UNIQUE,
               `email` varchar(255) NOT NULL UNIQUE,
@@ -37,7 +37,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM `${databaseManager.getTablePrefix() + tableName}` where email = ?"
+            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(email)) { queryResult ->
             if (queryResult.succeeded())

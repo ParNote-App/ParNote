@@ -1,11 +1,9 @@
 package com.parnote.db.entity
 
-import com.parnote.ErrorCode
 import com.parnote.db.DaoImpl
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
 import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import com.parnote.db.dao.SchemeVersionDao
-import com.parnote.model.Error
 import com.parnote.model.Result
 import com.parnote.model.SchemeVersion
 import com.parnote.model.Successful
@@ -60,29 +58,17 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
     override fun add(
         sqlConnection: SQLConnection,
         schemeVersion: SchemeVersion,
-        handler: (result: Result, asyncResult: AsyncResult<*>) -> Unit
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) = sqlConnection.updateWithParams(
         """
-                            INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`key`, `extra`) VALUES (?, ?)
-                """.trimIndent(),
+            INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`key`, `extra`) VALUES (?, ?)
+        """.trimIndent(),
         JsonArray()
             .add(schemeVersion.key)
             .add(schemeVersion.extra)
     ) {
-        handler.invoke(if (it.succeeded()) Successful() else Error(ErrorCode.SCHEME_VERSION_ADD_ERROR), it)
+        handler.invoke(if (it.succeeded()) Successful() else null, it)
     }!!
-
-    override fun add(schemeVersion: SchemeVersion, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection != null) {
-                add(databaseManager.getSQLConnection(connection), schemeVersion) { result, _ ->
-                    databaseManager.closeConnection(connection) {
-                        handler.invoke(result)
-                    }
-                }
-            }
-        }
-    }
 
     override fun getLastSchemeVersion(
         sqlConnection: SQLConnection,
@@ -99,7 +85,13 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
                 return@query
             }
 
-            handler.invoke(SchemeVersion(queryResult.result().results[0].getString(0), null), queryResult)
+            handler.invoke(
+                if (queryResult.result().results[0].getString(0) == null) null else SchemeVersion(
+                    queryResult.result().results[0].getString(
+                        0
+                    ), null
+                ), queryResult
+            )
         }
     }
 }

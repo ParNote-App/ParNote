@@ -37,7 +37,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
+                "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(email)) { queryResult ->
             if (queryResult.succeeded())
@@ -46,4 +46,21 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun isUsernameExists(
+            username: String,
+            sqlConnection: SQLConnection,
+            handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit) {
+
+        val query =
+                "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where username = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(username)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
 }

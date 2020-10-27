@@ -1,5 +1,6 @@
 package com.parnote.db
 
+import com.parnote.db.migration.DatabaseMigration_1_2
 import com.parnote.util.ConfigManager
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
@@ -20,12 +21,15 @@ class DatabaseManager(
         Database()
     }
 
-    private val mMigrations = listOf<DatabaseMigration>(
-    )
+    private val mMigrations by lazy {
+        listOf<DatabaseMigration>(
+            DatabaseMigration_1_2()
+        )
+    }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 1
-        const val DATABASE_SCHEME_VERSION_INFO = "Initial database"
+        const val DATABASE_SCHEME_VERSION = 2
+        const val DATABASE_SCHEME_VERSION_INFO = "Add user table"
     }
 
     init {
@@ -33,26 +37,26 @@ class DatabaseManager(
     }
 
     private fun checkMigration() {
-        createConnection { connection, _ ->
-            if (connection != null) {
-                mDatabase.schemeVersionDao.getLastSchemeVersion(getSQLConnection(connection)) { schemeVersion, _ ->
+        createConnection { sqlConnection, asyncResult ->
+            if (sqlConnection != null) {
+                mDatabase.schemeVersionDao.getLastSchemeVersion(sqlConnection) { schemeVersion, _ ->
                     if (schemeVersion == null)
-                        initDatabase(connection)
+                        initDatabase(sqlConnection)
                     else {
                         val databaseVersion = schemeVersion.key.toIntOrNull() ?: 0
 
                         if (databaseVersion == 0)
-                            initDatabase(connection)
+                            initDatabase(sqlConnection)
                         else
-                            migrate(connection, getSQLConnection(connection), databaseVersion)
+                            migrate(sqlConnection, databaseVersion)
                     }
                 }
             }
         }
     }
 
-    private fun migrate(connection: Connection, sqlConnection: SQLConnection, databaseVersion: Int) {
-        val handlers = mMigrations.map { it.migrate(sqlConnection, getTablePrefix()) }
+    private fun migrate(sqlConnection: SQLConnection, databaseVersion: Int) {
+        val handlers = mMigrations.map { it.migrate(sqlConnection) }
 
         var currentIndex = 0
 
@@ -60,10 +64,10 @@ class DatabaseManager(
             val localHandler: (AsyncResult<*>) -> Unit = {
                 fun check() {
                     when {
-                        it.failed() -> closeConnection(connection) {
+                        it.failed() -> closeConnection(sqlConnection) {
                             mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
                         }
-                        currentIndex == handlers.lastIndex -> closeConnection(connection)
+                        currentIndex == handlers.lastIndex -> closeConnection(sqlConnection)
                         else -> {
                             currentIndex++
 
@@ -76,7 +80,7 @@ class DatabaseManager(
                     mMigrations[currentIndex].updateSchemeVersion(sqlConnection)
                         .invoke { updateSchemeVersion ->
                             if (updateSchemeVersion.failed())
-                                closeConnection(connection) {
+                                closeConnection(sqlConnection) {
                                     mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
                                 }
                             else
@@ -90,7 +94,7 @@ class DatabaseManager(
                 if (currentIndex <= handlers.lastIndex)
                     handlers[currentIndex].invoke(localHandler)
             } else if (currentIndex == handlers.lastIndex)
-                closeConnection(connection)
+                closeConnection(sqlConnection)
             else {
                 currentIndex++
 
@@ -101,7 +105,7 @@ class DatabaseManager(
         invoke()
     }
 
-    fun createConnection(handler: (connection: Connection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
+    fun createConnection(handler: (sqlConnection: SQLConnection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
         if (!::mAsyncSQLClient.isInitialized) {
             val databaseConfig = (mConfigManager.getConfig()["database"] as Map<*, *>)
 
@@ -127,19 +131,25 @@ class DatabaseManager(
             mAsyncSQLClient = MySQLClient.createShared(mVertx, mySQLClientConfig, "MysqlLoginPool")
         }
 
-        Connection.createConnection(mLogger, mAsyncSQLClient) { connection, asyncResult ->
-            handler.invoke(connection, asyncResult)
+        mAsyncSQLClient.getConnection { getConnection ->
+            if (getConnection.succeeded())
+                handler.invoke(getConnection.result(), getConnection)
+            else {
+                mLogger.error("Failed to connect database! Please check your configuration! Error is: ${getConnection.cause()}")
+
+                handler.invoke(null, getConnection)
+            }
         }
     }
 
-    fun closeConnection(connection: Connection, handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
-        connection.closeConnection(handler)
+    fun closeConnection(sqlConnection: SQLConnection, handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
+        sqlConnection.close {
+            handler?.invoke(it)
+        }
     }
 
-    fun getSQLConnection(connection: Connection) = connection.getSQLConnection()
-
-    private fun initDatabase(connection: Connection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
-        val databaseInitProcessHandlers = mDatabase.init(getSQLConnection(connection))
+    private fun initDatabase(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
+        val databaseInitProcessHandlers = mDatabase.init()
 
         var currentIndex = 0
 
@@ -147,7 +157,7 @@ class DatabaseManager(
             val localHandler: (AsyncResult<*>) -> Unit = {
                 when {
                     it.failed() || currentIndex == databaseInitProcessHandlers.lastIndex -> closeConnection(
-                        connection
+                        sqlConnection
                     ) { _ ->
                         handler.invoke(it)
                     }
@@ -160,7 +170,7 @@ class DatabaseManager(
             }
 
             if (currentIndex <= databaseInitProcessHandlers.lastIndex)
-                databaseInitProcessHandlers[currentIndex].invoke(localHandler)
+                databaseInitProcessHandlers[currentIndex].invoke(sqlConnection, localHandler)
         }
 
         invoke()

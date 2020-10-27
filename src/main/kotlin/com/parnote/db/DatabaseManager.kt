@@ -1,5 +1,6 @@
 package com.parnote.db
 
+import com.parnote.db.migration.DatabaseMigration_1_2
 import com.parnote.util.ConfigManager
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
@@ -22,12 +23,13 @@ class DatabaseManager(
 
     private val mMigrations by lazy {
         listOf<DatabaseMigration>(
+            DatabaseMigration_1_2()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 1
-        const val DATABASE_SCHEME_VERSION_INFO = "Initial database"
+        const val DATABASE_SCHEME_VERSION = 2
+        const val DATABASE_SCHEME_VERSION_INFO = "Add user table"
     }
 
     init {

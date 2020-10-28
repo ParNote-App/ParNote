@@ -27,16 +27,17 @@ class ResetPasswordAPI: Api() {
     lateinit var reCaptcha: ReCaptcha
 
 
+
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
 
 
         val data = context.bodyAsJson
 
-        val emailOrUsername = data.getString("emailOrUsername")
-        val password = data.getString("password")
-        val forgotPassword = data.getBoolean("forgotPassword?")
+        val usernameOrEmail = data.getString("usernameOrEmail")
+        val reCaptcha = data.getString("recaptcha")
 
-        validateForm(emailOrUsername, password, forgotPassword, handler) {
+
+        validateForm(usernameOrEmail, reCaptcha, handler) {
 
         }
 
@@ -49,26 +50,24 @@ class ResetPasswordAPI: Api() {
     }
 
 
-    fun validateForm (emailOrUsername: String, password: String, forgotPassword: Boolean,  errorHandler : (result: Result) -> Unit, successHandler: () -> Unit
+    fun validateForm (usernameOrEmail: String, reCaptcha: String, errorHandler : (result: Result) -> Unit, successHandler: () -> Unit
         ) {
 
-        if (password.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_EMPTY))
+        if (usernameOrEmail.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
             return
         }
 
-        if (password.length < 5) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_SHORT))
+
+
+        if (!usernameOrEmail.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$")) && !usernameOrEmail.matches(Regex("^[a-zA-Z0-9]+\$")) ) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
             return
         }
 
-        if (password.length > 30){
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_LONG))
 
-        }
-
-        if (!password.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_INVALID))
+        if(this.reCaptcha.isValid(reCaptcha)){
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_RECAPTCHA_INVALID))
             return
         }
 

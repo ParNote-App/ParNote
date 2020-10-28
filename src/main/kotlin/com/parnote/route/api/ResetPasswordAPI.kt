@@ -4,10 +4,7 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.db.DatabaseManager
-import com.parnote.model.Api
-import com.parnote.model.Error
-import com.parnote.model.Result
-import com.parnote.model.RouteType
+import com.parnote.model.*
 import de.triology.recaptchav2java.ReCaptcha
 
 import io.vertx.ext.web.RoutingContext
@@ -42,6 +39,8 @@ class ResetPasswordAPI: Api() {
         validateForm(emailOrUsername, password, forgotPassword, handler) {
 
         }
+
+        handler.invoke(Successful())
 
 
 

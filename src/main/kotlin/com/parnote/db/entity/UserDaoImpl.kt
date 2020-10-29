@@ -127,4 +127,20 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getUserIDFromUsernameOrEmail(
+        usernameOrEmail: String,
+        sqlConnection: SQLConnection,
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT id FROM `${databaseManager.getTablePrefix() + tableName}` where username = ? or email = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(usernameOrEmail).add(usernameOrEmail)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

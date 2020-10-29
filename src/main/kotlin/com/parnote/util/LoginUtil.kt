@@ -65,8 +65,12 @@ object LoginUtil {
 
                             handler.invoke(true, asyncResultOfCreateToken)
                         }
-                    else
+                    else {
                         routingContext.session().put("user_id", userID)
+
+
+                        handler.invoke(true, asyncResult)
+                    }
                 }
 
                 return@isLoginCorrect

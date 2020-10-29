@@ -7,7 +7,8 @@ import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
 
 object LoginUtil {
-    const val SESSION_COOKIE_NAME = "parnote_token"
+    const val COOKIE_NAME = "parnote_token"
+    const val SESSION_NAME = "user_id"
 
     fun login(
         usernameOrEmail: String,
@@ -56,7 +57,7 @@ object LoginUtil {
                             val age = 60 * 60 * 24 * 365 * 2L // 2 years valid
                             val path = "/" // root dir
 
-                            val tokenCookie = Cookie.cookie(SESSION_COOKIE_NAME, token)
+                            val tokenCookie = Cookie.cookie(COOKIE_NAME, token)
 
                             tokenCookie.setMaxAge(age)
                             tokenCookie.path = path
@@ -66,7 +67,7 @@ object LoginUtil {
                             handler.invoke(true, asyncResultOfCreateToken)
                         }
                     else {
-                        routingContext.session().put("user_id", userID)
+                        routingContext.session().put(SESSION_NAME, userID)
 
 
                         handler.invoke(true, asyncResult)

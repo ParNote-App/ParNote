@@ -115,7 +115,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun getSecretKeyByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT secret_key FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"

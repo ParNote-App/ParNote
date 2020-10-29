@@ -76,7 +76,9 @@ class RouterModule(private val mVertx: Vertx) {
 
         router.route()
             .handler(BodyHandler.create())
-            .handler(SessionHandler.create(LocalSessionStore.create(mVertx)))
+            .handler(
+                SessionHandler.create(LocalSessionStore.create(mVertx)).setSessionTimeout(60 * 60 * 24)
+            ) // 24 hours session timeout
             .handler(
                 CorsHandler.create(".*.")
                     .allowCredentials(true)

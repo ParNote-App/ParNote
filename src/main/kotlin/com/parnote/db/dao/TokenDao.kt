@@ -10,6 +10,11 @@ import io.vertx.ext.sql.SQLConnection
 interface TokenDao : Dao<Token> {
     fun add(token: Token, sqlConnection: SQLConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
 
+    fun getUserIDFromToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
 
     fun delete(
         token: Token,

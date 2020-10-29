@@ -9,4 +9,11 @@ import io.vertx.ext.sql.SQLConnection
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface TokenDao : Dao<Token> {
     fun add(token: Token, sqlConnection: SQLConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
+
+
+    fun delete(
+        token: Token,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

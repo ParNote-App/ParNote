@@ -143,4 +143,20 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun isEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (isVerified: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where `id` = ? and email_verified = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID).add(1)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

@@ -1,6 +1,9 @@
 package com.parnote.util
 
 import com.parnote.db.DatabaseManager
+import com.parnote.db.model.Token
+import com.parnote.model.Result
+import com.parnote.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.http.Cookie
 import io.vertx.ext.sql.SQLConnection
@@ -78,6 +81,57 @@ object LoginUtil {
             }
 
             handler.invoke(false, asyncResult)
+        }
+    }
+
+    fun logout(
+        databaseManager: DatabaseManager,
+        routingContext: RoutingContext,
+        handler: (isLoggedOut: Result?, asyncResult: AsyncResult<*>?) -> Unit
+    ) {
+        val session = routingContext.session().get<String?>(SESSION_NAME)
+
+        if (session != null) {
+            routingContext.session().destroy()
+
+            handler.invoke(Successful(), null)
+
+            return
+        }
+
+        val cookie = routingContext.getCookie(COOKIE_NAME)
+
+        if (cookie != null) {
+            val token = cookie.value
+
+            routingContext.removeCookie(COOKIE_NAME)
+
+            databaseManager.createConnection { sqlConnection, asyncResult ->
+                if (sqlConnection == null) {
+                    handler.invoke(null, asyncResult)
+
+                    return@createConnection
+                }
+
+                databaseManager.getDatabase().tokenDao.delete(
+                    Token(
+                        -1,
+                        token,
+                        -1,
+                        TokenUtil.SUBJECT.LOGIN_SESSION.toString()
+                    ), sqlConnection
+                ) { result, asyncResultOfDelete ->
+                    databaseManager.closeConnection(sqlConnection) {
+                        if (result == null) {
+                            handler.invoke(null, asyncResultOfDelete)
+
+                            return@closeConnection
+                        }
+
+                        handler.invoke(Successful(), asyncResultOfDelete)
+                    }
+                }
+            }
         }
     }
 }

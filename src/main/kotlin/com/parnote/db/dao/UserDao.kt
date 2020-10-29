@@ -38,4 +38,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUserIDFromUsernameOrEmail(
+        usernameOrEmail: String,
+        sqlConnection: SQLConnection,
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

@@ -44,4 +44,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun isEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (isVerified: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

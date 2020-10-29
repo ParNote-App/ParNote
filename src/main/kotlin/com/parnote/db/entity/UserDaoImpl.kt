@@ -94,16 +94,16 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
         sqlConnection.queryWithParams(
-                query,
-                JsonArray()
-                        .add(user.username)
-                        .add(user.email)
-                        .add(user.password)
-                        .add(user.permissionID)
-                        .add(user.ipAddress)
-                        .add(Base64.getEncoder().encodeToString(key.private.encoded))
-                        .add(Base64.getEncoder().encodeToString(key.public.encoded))
-                        .add(System.currentTimeMillis())
+            query,
+            JsonArray()
+                .add(user.username)
+                .add(user.email)
+                .add(user.password)
+                .add(user.permissionID)
+                .add(user.ipAddress)
+                .add(Base64.getEncoder().encodeToString(key.private.encoded))
+                .add(Base64.getEncoder().encodeToString(key.public.encoded))
+                .add(System.currentTimeMillis())
         ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(Successful(), queryResult)
@@ -112,4 +112,19 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         }
     }
 
+    override fun getSecretKeyByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT secret_key FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getString(0), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

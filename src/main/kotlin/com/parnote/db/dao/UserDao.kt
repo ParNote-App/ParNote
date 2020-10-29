@@ -21,15 +21,21 @@ interface UserDao : Dao<User> {
     )
 
     fun isLoginCorrect(
-            usernameOrEmail: String,
-            password: String,
-            sqlConnection: SQLConnection,
-            handler: (loginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        usernameOrEmail: String,
+        password: String,
+        sqlConnection: SQLConnection,
+        handler: (loginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun add(
-            user: User,
-            sqlConnection: SQLConnection,
-            handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit
+        user: User,
+        sqlConnection: SQLConnection,
+        handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun getSecretKeyByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

@@ -132,6 +132,10 @@ object LoginUtil {
                     }
                 }
             }
+
+            return
         }
+
+        handler.invoke(Successful(), null)
     }
 }

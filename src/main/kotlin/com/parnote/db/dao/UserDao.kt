@@ -36,6 +36,6 @@ interface UserDao : Dao<User> {
     fun getSecretKeyByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

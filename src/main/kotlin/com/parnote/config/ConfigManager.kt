@@ -1,5 +1,6 @@
 package com.parnote.config
 
+import com.parnote.config.migration.ConfigMigration_1_2
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
@@ -13,6 +14,7 @@ import java.io.File
 class ConfigManager(mLogger: Logger, mVertx: Vertx) {
 
     private val mMigrations = listOf<ConfigMigration>(
+        ConfigMigration_1_2()
     )
 
     private val mConfig = com.beust.klaxon.JsonObject()
@@ -30,7 +32,7 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     }
 
     companion object {
-        private const val CONFIG_VERSION = 1
+        private const val CONFIG_VERSION = 2
 
         private val DEFAULT_CONFIG by lazy {
             JsonObject(
@@ -46,6 +48,14 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                         "password" to "",
                         "prefix" to "parnote_"
                     ),
+
+                    "mail" to mapOf(
+                        "host" to "",
+                        "port" to 465,
+                        "username" to "",
+                        "password" to "",
+                        "SSL" to true
+                    )
                 )
             )
         }

@@ -25,6 +25,6 @@ interface TokenDao : Dao<Token> {
     fun isTokenExists(
         token: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

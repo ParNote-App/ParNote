@@ -71,6 +71,22 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         }
     }
 
+    override fun isExistsByUsernameOrEmail(
+        usernameOrEmail: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where username = ? or email = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(usernameOrEmail).add(usernameOrEmail)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
     override fun isLoginCorrect(
         usernameOrEmail: String,
         password: String,

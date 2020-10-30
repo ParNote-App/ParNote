@@ -49,7 +49,8 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                         "prefix" to "parnote_"
                     ),
 
-                    "mail" to mapOf(
+                    "email" to mapOf(
+                        "address" to "",
                         "host" to "",
                         "port" to 465,
                         "username" to "",

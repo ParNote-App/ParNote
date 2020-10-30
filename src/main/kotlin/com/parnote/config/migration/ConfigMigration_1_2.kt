@@ -12,7 +12,8 @@ class ConfigMigration_1_2(
     override fun migrate(configManager: ConfigManager) {
         configManager.getConfig().putAll(
             mapOf(
-                "mail" to mapOf(
+                "email" to mapOf(
+                    "address" to "",
                     "host" to "",
                     "port" to 465,
                     "username" to "",

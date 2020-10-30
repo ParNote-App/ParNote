@@ -81,4 +81,20 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun isTokenExists(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

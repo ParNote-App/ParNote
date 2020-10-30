@@ -1,4 +1,4 @@
-package com.parnote.util
+package com.parnote.config
 
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions

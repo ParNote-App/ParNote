@@ -1,8 +1,8 @@
 package com.parnote.db
 
+import com.parnote.config.ConfigManager
 import com.parnote.db.migration.DatabaseMigration_1_2
 import com.parnote.db.migration.DatabaseMigration_2_3
-import com.parnote.util.ConfigManager
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger

@@ -50,4 +50,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (isVerified: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun makeEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

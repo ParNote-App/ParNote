@@ -16,9 +16,9 @@ import java.util.*
 class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao {
 
     override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
-            { sqlConnection, handler ->
-                sqlConnection.query(
-                        """
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(16) NOT NULL UNIQUE,
@@ -33,18 +33,18 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
         """
-                ) {
-                    handler.invoke(it)
-                }
+            ) {
+                handler.invoke(it)
             }
+        }
 
     override fun isEmailExists(
-            email: String,
-            sqlConnection: SQLConnection,
-            handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        email: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-                "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
+            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(email)) { queryResult ->
             if (queryResult.succeeded())
@@ -55,12 +55,13 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     }
 
     override fun isUsernameExists(
-            username: String,
-            sqlConnection: SQLConnection,
-            handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit) {
+        username: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
 
         val query =
-                "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where username = ?"
+            "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where username = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(username)) { queryResult ->
             if (queryResult.succeeded())
@@ -71,14 +72,18 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     }
 
     override fun isLoginCorrect(
-            usernameOrEmail: String,
-            password: String,
-            sqlConnection: SQLConnection, handler: (loginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit) {
+        usernameOrEmail: String,
+        password: String,
+        sqlConnection: SQLConnection, handler: (loginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
 
         val query =
-                "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where (username = ? or email = ?) and password = ?"
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where (username = ? or email = ?) and password = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(usernameOrEmail).add(usernameOrEmail).add(DigestUtils.md5Hex(password))) { queryResult ->
+        sqlConnection.queryWithParams(
+            query,
+            JsonArray().add(usernameOrEmail).add(usernameOrEmail).add(DigestUtils.md5Hex(password))
+        ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
             else
@@ -86,10 +91,14 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         }
     }
 
-    override fun add(user: User, sqlConnection: SQLConnection, handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun add(
+        user: User,
+        sqlConnection: SQLConnection,
+        handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
         val query =
-                "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
-                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?); "
+            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?); "
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
@@ -155,6 +164,25 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         sqlConnection.queryWithParams(query, JsonArray().add(userID).add(1)) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun makeEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET email_verified = ? WHERE `id` = ?"
+
+        sqlConnection.updateWithParams(
+            query,
+            JsonArray().add(1).add(userID)
+        ) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
             else
                 handler.invoke(null, queryResult)
         }

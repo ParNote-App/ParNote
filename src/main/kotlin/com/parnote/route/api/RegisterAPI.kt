@@ -4,7 +4,10 @@ import com.parnote.ErrorCode
 import com.parnote.Main.Companion.getComponent
 import com.parnote.db.DatabaseManager
 import com.parnote.db.model.User
-import com.parnote.model.*
+import com.parnote.model.Api
+import com.parnote.model.Error
+import com.parnote.model.Result
+import com.parnote.model.RouteType
 import com.parnote.util.RegisterUtil
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
@@ -92,11 +95,10 @@ class RegisterAPI : Api() {
 
                                 return@register
                             }
-
-                            handler.invoke(Successful())
+                            TODO("SEND EMAIL")
+                        }
                         }
                     }
-
                 }
             }
         }
@@ -107,7 +109,7 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isEmailExists(email, connection) { exists ->
         } //emailin varligini kontrol eder
          */
-    }
+
 
     /**context.response().end(
     JsonObject(

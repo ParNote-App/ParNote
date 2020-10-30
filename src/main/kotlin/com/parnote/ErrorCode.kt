@@ -32,6 +32,4 @@ enum class ErrorCode {
     TAKEN_USERNAME_ERROR,
 
     RECAPTCHA_NOT_VALID,
-
-
 }

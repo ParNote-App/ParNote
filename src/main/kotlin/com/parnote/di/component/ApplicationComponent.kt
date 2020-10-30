@@ -17,7 +17,8 @@ import javax.inject.Singleton
         (RouterModule::class),
         (ConfigManagerModule::class),
         (RecaptchaModule::class),
-        (DatabaseManagerModule::class)
+        (DatabaseManagerModule::class),
+        (MailClientModule::class)
     ]
 )
 interface ApplicationComponent {

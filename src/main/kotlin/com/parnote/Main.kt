@@ -56,6 +56,7 @@ class Main : AbstractVerticle() {
                 .loggerModule(LoggerModule(mLogger))
                 .routerModule(RouterModule(mVertx))
                 .configManagerModule(ConfigManagerModule(mConfigManager))
+                .mailClientModule(MailClientModule(mConfigManager))
                 .databaseManagerModule(DatabaseManagerModule(DatabaseManager(mVertx, mLogger, mConfigManager)))
                 .build()
         }

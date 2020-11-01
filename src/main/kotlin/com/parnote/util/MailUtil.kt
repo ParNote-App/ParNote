@@ -10,11 +10,17 @@ import io.vertx.ext.mail.MailMessage
 import io.vertx.ext.sql.SQLConnection
 
 object MailUtil {
-    enum class MilType(val message: String, val messageHTML: String, val tokenSubject: TokenUtil.SUBJECT) {
+    enum class MilType(
+        val message: String,
+        val messageHTML: String,
+        val tokenSubject: TokenUtil.SUBJECT,
+        val tokenAddress: String
+    ) {
         ACTIVATION(
             "Hello, this is your activation link for your e-mail address: {0}",
             "Hello, this is your activation link for your e-mail address: <a href=\"{0}\">Activate It</a>",
-            TokenUtil.SUBJECT.VERIFY_MAIL
+            TokenUtil.SUBJECT.VERIFY_MAIL,
+            "http://localhost:8080/activate?token={0}"
         ),
     }
 
@@ -51,7 +57,7 @@ object MailUtil {
 
                 val message = MailMessage()
 
-                val activationLink = "http://localhost:8080/activate?token=$token"
+                val activationLink = mailType.tokenAddress.format(token)
 
                 message.from = (configManager.getConfig()["email"] as Map<*, *>)["address"] as String
                 message.subject = "Mail Activation"

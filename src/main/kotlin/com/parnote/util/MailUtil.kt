@@ -10,9 +10,17 @@ import io.vertx.ext.mail.MailMessage
 import io.vertx.ext.sql.SQLConnection
 
 object MailUtil {
+    enum class MilType(val message: String, val messageHTML: String, val tokenSubject: TokenUtil.SUBJECT) {
+        ACTIVATION(
+            "Hello, this is your activation link for your e-mail address: {0}",
+            "Hello, this is your activation link for your e-mail address: <a href=\"{0}\">Activate It</a>",
+            TokenUtil.SUBJECT.VERIFY_MAIL
+        ),
+    }
 
-    fun sendActivationMail(
+    fun sendMail(
         userID: Int,
+        mailType: MilType,
         sqlConnection: SQLConnection,
         configManager: ConfigManager,
         databaseManager: DatabaseManager,
@@ -20,7 +28,7 @@ object MailUtil {
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         TokenUtil.createToken(
-            TokenUtil.SUBJECT.VERIFY_MAIL,
+            mailType.tokenSubject,
             userID,
             databaseManager,
             sqlConnection
@@ -49,9 +57,8 @@ object MailUtil {
                 message.subject = "Mail Activation"
                 message.setTo(email)
 
-                message.text = "Hello, this is your activation link for your e-mail address: $activationLink"
-                message.html =
-                    "Hello, this is your activation link for your e-mail address: <a href=\"$activationLink\">Activate It</a>"
+                message.text = mailType.message.format(activationLink)
+                message.html = mailType.messageHTML.format(activationLink)
 
                 mailClient.sendMail(message) { sendMailResult ->
                     if (sendMailResult.failed()) {

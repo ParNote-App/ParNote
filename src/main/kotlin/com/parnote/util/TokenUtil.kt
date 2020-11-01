@@ -11,7 +11,8 @@ import java.util.*
 object TokenUtil {
     enum class SUBJECT {
         LOGIN_SESSION,
-        VERIFY_MAIL
+        VERIFY_MAIL,
+        RESET_PASSWORD
     }
 
     fun createToken(

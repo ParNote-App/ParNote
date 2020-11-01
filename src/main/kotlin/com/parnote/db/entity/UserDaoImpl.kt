@@ -219,4 +219,24 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun changePasswordByID(
+        userID: Int,
+        newPassword: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET password = ? WHERE `id` = ?"
+
+        sqlConnection.updateWithParams(
+            query,
+            JsonArray().add(DigestUtils.md5Hex(newPassword)).add(userID)
+        ) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

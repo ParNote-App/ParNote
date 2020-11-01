@@ -68,4 +68,11 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (email: String?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun changePasswordByID(
+        userID: Int,
+        newPassword: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

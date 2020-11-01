@@ -97,4 +97,20 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getCreatedTimeByToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (createdTime: Long?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT created_time FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getString(0).toLong(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

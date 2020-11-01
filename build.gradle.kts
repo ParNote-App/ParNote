@@ -101,4 +101,8 @@ tasks {
                 attributes(mapOf("MODE" to "DEVELOPMENT"))
         }
     }
+
+    register("stage") {
+        dependsOn("build")
+    }
 }

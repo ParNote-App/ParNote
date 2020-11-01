@@ -41,7 +41,7 @@ abstract class Api : Route() {
         }
     }
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
+    fun getHandler(context: RoutingContext) {
         val response = context.response()
 
         response
@@ -50,6 +50,10 @@ abstract class Api : Route() {
         getHandler(context) { result ->
             getResultHandler(result, context)
         }
+    }
+
+    override fun getHandler() = Handler<RoutingContext> { context ->
+        getHandler(context)
     }
 
     abstract fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit)

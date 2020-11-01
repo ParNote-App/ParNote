@@ -1,0 +1,68 @@
+package com.parnote.util
+
+import com.parnote.config.ConfigManager
+import com.parnote.db.DatabaseManager
+import com.parnote.model.Result
+import com.parnote.model.Successful
+import io.vertx.core.AsyncResult
+import io.vertx.ext.mail.MailClient
+import io.vertx.ext.mail.MailMessage
+import io.vertx.ext.sql.SQLConnection
+
+object MailUtil {
+
+    fun sendActivationMail(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        configManager: ConfigManager,
+        databaseManager: DatabaseManager,
+        mailClient: MailClient,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        TokenUtil.createToken(
+            TokenUtil.SUBJECT.VERIFY_MAIL,
+            userID,
+            databaseManager,
+            sqlConnection
+        ) { token, asyncResultOfCreateToken ->
+            if (token == null) {
+                handler.invoke(null, asyncResultOfCreateToken)
+
+                return@createToken
+            }
+
+            databaseManager.getDatabase().userDao.getEmailByID(
+                userID,
+                sqlConnection
+            ) { email, asyncResultOfGetEmailByID ->
+                if (email == null) {
+                    handler.invoke(null, asyncResultOfGetEmailByID)
+
+                    return@getEmailByID
+                }
+
+                val message = MailMessage()
+
+                val activationLink = "http://localhost:8080/activate?token=$token"
+
+                message.from = (configManager.getConfig()["email"] as Map<*, *>)["address"] as String
+                message.subject = "Mail Activation"
+                message.setTo(email)
+
+                message.text = "Hello, this is your activation link for your e-mail address: $activationLink"
+                message.html =
+                    "Hello, this is your activation link for your e-mail address: <a href=\"$activationLink\">Activate It</a>"
+
+                mailClient.sendMail(message) { sendMailResult ->
+                    if (sendMailResult.failed()) {
+                        handler.invoke(null, sendMailResult)
+
+                        return@sendMail
+                    }
+
+                    handler.invoke(Successful(), sendMailResult)
+                }
+            }
+        }
+    }
+}

@@ -123,7 +123,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             JsonArray()
                 .add(user.username)
                 .add(user.email)
-                .add(user.password)
+                .add(DigestUtils.md5Hex(user.password))
                 .add(user.permissionID)
                 .add(user.ipAddress)
                 .add(Base64.getEncoder().encodeToString(key.private.encoded))

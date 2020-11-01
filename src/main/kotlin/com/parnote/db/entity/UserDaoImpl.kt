@@ -203,4 +203,20 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getEmailByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (email: String?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT email FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getString(0), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

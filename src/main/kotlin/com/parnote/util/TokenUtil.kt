@@ -10,7 +10,8 @@ import java.util.*
 
 object TokenUtil {
     enum class SUBJECT {
-        LOGIN_SESSION
+        LOGIN_SESSION,
+        VERIFY_MAIL
     }
 
     fun createToken(

@@ -22,6 +22,12 @@ object MailUtil {
             TokenUtil.SUBJECT.VERIFY_MAIL,
             "http://localhost:8080/activate?token={0}"
         ),
+        RESET_PASSWORD(
+            "Hello, here is your reset password link: {0}",
+            "Hello, here is your reset password link: <a href=\"{0}\">Reset Password</a>",
+            TokenUtil.SUBJECT.RESET_PASSWORD,
+            "http://localhost:8080/reset-password?token={0}"
+        )
     }
 
     fun sendMail(

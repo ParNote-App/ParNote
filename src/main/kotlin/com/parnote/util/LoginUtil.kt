@@ -84,6 +84,53 @@ object LoginUtil {
         }
     }
 
+    fun isLoggedIn(
+        databaseManager: DatabaseManager,
+        routingContext: RoutingContext,
+        handler: (isLoggedIn: Boolean, asyncResult: AsyncResult<*>?) -> Unit
+    ) {
+        val session = routingContext.session().get<String?>(SESSION_NAME)
+
+        if (session != null) {
+            handler.invoke(true, null)
+
+            return
+        }
+
+        val cookie = routingContext.getCookie(COOKIE_NAME)
+
+        if (cookie == null) {
+            handler.invoke(false, null)
+
+            return
+        }
+
+        val token = cookie.value
+
+        databaseManager.createConnection { sqlConnection, asyncResult ->
+            if (sqlConnection == null) {
+                handler.invoke(false, asyncResult)
+
+                return@createConnection
+            }
+
+            databaseManager.getDatabase().tokenDao.isTokenExists(
+                token,
+                sqlConnection
+            ) { isTokenExists, asyncResultOfIsTokenExists ->
+                databaseManager.closeConnection(sqlConnection) {
+                    if (isTokenExists == null) {
+                        handler.invoke(false, asyncResultOfIsTokenExists)
+
+                        return@closeConnection
+                    }
+
+                    handler.invoke(isTokenExists, asyncResult)
+                }
+            }
+        }
+    }
+
     fun logout(
         databaseManager: DatabaseManager,
         routingContext: RoutingContext,

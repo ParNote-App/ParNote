@@ -3,12 +3,12 @@ package com.parnote.route.api
 
 import com.parnote.ErrorCode
 import com.parnote.Main
+import com.parnote.config.ConfigManager
 import com.parnote.db.DatabaseManager
-import com.parnote.model.Api
-import com.parnote.model.Error
-import com.parnote.model.Result
-import com.parnote.model.RouteType
+import com.parnote.model.*
+import com.parnote.util.MailUtil
 import de.triology.recaptchav2java.ReCaptcha
+import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -26,6 +26,12 @@ class ResetPasswordAPI : Api() {
 
     @Inject
     lateinit var reCaptcha: ReCaptcha
+
+    @Inject
+    lateinit var configManager: ConfigManager
+
+    @Inject
+    lateinit var mailClient: MailClient
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
@@ -61,7 +67,38 @@ class ResetPasswordAPI : Api() {
                         return@isExistsByUsernameOrEmail
                     }
 
-                    TODO("SEND EMAIL")
+                    databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
+                        usernameOrEmail,
+                        sqlConnection
+                    ) { userID, _ ->
+
+                        if (userID == null) {
+                            databaseManager.closeConnection(sqlConnection) {
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                            }
+
+                            return@getUserIDFromUsernameOrEmail
+                        }
+
+                        MailUtil.sendMail(
+                            userID,
+                            MailUtil.MilType.RESET_PASSWORD,
+                            sqlConnection,
+                            configManager,
+                            databaseManager,
+                            mailClient
+                        ) { result, _ ->
+                            if (result == null) {
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                }
+
+                                return@sendMail
+                            }
+
+                            handler.invoke(Successful())
+                        }
+                    }
                 }
             }
         }

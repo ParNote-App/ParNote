@@ -2,14 +2,14 @@ package com.parnote.route.api
 
 import com.parnote.ErrorCode
 import com.parnote.Main.Companion.getComponent
+import com.parnote.config.ConfigManager
 import com.parnote.db.DatabaseManager
 import com.parnote.db.model.User
-import com.parnote.model.Api
-import com.parnote.model.Error
-import com.parnote.model.Result
-import com.parnote.model.RouteType
+import com.parnote.model.*
+import com.parnote.util.MailUtil
 import com.parnote.util.RegisterUtil
 import de.triology.recaptchav2java.ReCaptcha
+import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -33,6 +33,12 @@ class RegisterAPI : Api() {
     @Inject
     lateinit var reCaptcha: ReCaptcha //ReCaptchayi cagirdik
 
+    @Inject
+    lateinit var configManager: ConfigManager
+
+    @Inject
+    lateinit var mailClient: MailClient
+
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
 
         val data = context.bodyAsJson //contextin bodysini alip jsona cevirdik
@@ -50,6 +56,7 @@ class RegisterAPI : Api() {
             databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) { //db e erisim olmazsa null doner onu kontrol edip hatamizi veriyoruz
                     handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
+
                     return@createConnection
                 }
 
@@ -59,6 +66,7 @@ class RegisterAPI : Api() {
                         databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_1))
                         }
+
                         return@isEmailExists
                     }
 
@@ -66,6 +74,7 @@ class RegisterAPI : Api() {
                         databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.TAKEN_EMAIL_ERROR))
                         }
+
                         return@isEmailExists
                     }
 
@@ -74,6 +83,7 @@ class RegisterAPI : Api() {
                             databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
                             }
+
                             return@isUsernameExists
                         }
 
@@ -81,34 +91,52 @@ class RegisterAPI : Api() {
                             databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.TAKEN_USERNAME_ERROR))
                             }
+
                             return@isUsernameExists
                         }
-
 
                         // şuraya kadar geldiyse
                         // hiç bir şey de sorun yok
                         // şimdi geldik adamı kaydetmeye
+                        // Bunlar PHP ile birkaç dk -Berk
 
                         RegisterUtil.register(databaseManager, User(-1, username, email, password, ipAddress), sqlConnection) { isEnrolled ->
                             if (isEnrolled == null) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                                }
 
                                 return@register
                             }
-                            TODO("SEND EMAIL")
-                        }
+
+                            databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(username, sqlConnection) { userID, _ ->
+                                if (userID == null) {
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                                    }
+
+                                    return@getUserIDFromUsernameOrEmail
+                                }
+
+                                MailUtil.sendMail(userID, MailUtil.MilType.ACTIVATION, sqlConnection, configManager, databaseManager, mailClient) { _, _ ->
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        handler.invoke(Successful())
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+    }
 
 
-        /**databaseManager.getDatabase().""buraya validate'e gore .tablo ismi gelecek"" //bunun yerine userDao kullanilacak
-        databaseManager.createConnection { connection, asyncResult ->
-        databaseManager.getDatabase().userDao.isEmailExists(email, connection) { exists ->
-        } //emailin varligini kontrol eder
-         */
+    /**databaseManager.getDatabase().""buraya validate'e gore .tablo ismi gelecek"" //bunun yerine userDao kullanilacak
+    databaseManager.createConnection { connection, asyncResult ->
+    databaseManager.getDatabase().userDao.isEmailExists(email, connection) { exists ->
+    } //emailin varligini kontrol eder
+     */
 
 
     /**context.response().end(
@@ -209,7 +237,7 @@ class RegisterAPI : Api() {
             errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_INVALID))
         }
 
-        if (termsBox == false) {
+        if (!termsBox) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NOT_ACCEPTED_TERMS))
             return
         }
@@ -218,7 +246,6 @@ class RegisterAPI : Api() {
             errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
             return
         }
-
 
         successHandler.invoke()
     }

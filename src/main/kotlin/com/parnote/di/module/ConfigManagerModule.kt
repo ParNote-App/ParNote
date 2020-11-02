@@ -1,6 +1,6 @@
 package com.parnote.di.module
 
-import com.parnote.util.ConfigManager
+import com.parnote.config.ConfigManager
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

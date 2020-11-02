@@ -1,6 +1,6 @@
 package com.parnote
 
-// last ID 3
+// last ID 4
 enum class ErrorCode {
     SCHEME_VERSION_ADD_ERROR,
     UNKNOWN_ERROR,
@@ -8,7 +8,6 @@ enum class ErrorCode {
     UNKNOWN_ERROR_2,
     UNKNOWN_ERROR_3,
     UNKNOWN_ERROR_4,
-
 
     REGISTER_NAME_EMPTY,
     REGISTER_NAME_SHORT,
@@ -32,6 +31,11 @@ enum class ErrorCode {
     TAKEN_USERNAME_ERROR,
 
     RECAPTCHA_NOT_VALID,
+
+    RESETPASSWORD_PASSWORD_EMPTY,
+    RESETPASSWORD_PASSWORD_SHORT,
+    RESETPASSWORD_PASSWORD_LONG,
+    RESETPASSWORD_PASSWORD_INVALID,
 
 
 }

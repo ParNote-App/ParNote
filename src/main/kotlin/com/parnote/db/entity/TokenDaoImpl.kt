@@ -50,6 +50,22 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         }
     }
 
+    override fun getUserIDFromToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT user_id FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
     override fun delete(
         token: Token,
         sqlConnection: SQLConnection,
@@ -61,6 +77,38 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         sqlConnection.updateWithParams(query, JsonArray().add(token.token)) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun isTokenExists(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (exits: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun getCreatedTimeByToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (createdTime: Long?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT created_time FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getString(0).toLong(), queryResult)
             else
                 handler.invoke(null, queryResult)
         }

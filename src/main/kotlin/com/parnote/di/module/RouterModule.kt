@@ -75,16 +75,16 @@ class RouterModule(private val mVertx: Vertx) {
         allowedMethods.add(HttpMethod.PUT)
 
         router.route()
-                .handler(BodyHandler.create())
-                .handler(
-                        SessionHandler.create(LocalSessionStore.create(mVertx)).setSessionTimeout(60 * 60 * 24)
-                ) // 24 hours session timeout
-                .handler(
-                        CorsHandler.create(".*.")
-                                .allowCredentials(true)
-                                .allowedHeaders(allowedHeaders)
-                                .allowedMethods(allowedMethods)
-                )
+            .handler(BodyHandler.create())
+            .handler(
+                SessionHandler.create(LocalSessionStore.create(mVertx)).setSessionTimeout(60 * 60 * 24)
+            ) // 24 hours session timeout
+            .handler(
+                CorsHandler.create(".*.")
+                    .allowCredentials(true)
+                    .allowedHeaders(allowedHeaders)
+                    .allowedMethods(allowedMethods)
+            )
 
         mRouteList.forEach { route ->
             route.routes.forEach { url ->

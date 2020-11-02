@@ -9,15 +9,21 @@ import io.vertx.ext.sql.SQLConnection
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface UserDao : Dao<User> {
     fun isEmailExists(
-            email: String,
-            sqlConnection: SQLConnection,
-            handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        email: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isUsernameExists(
-            username: String,
-            sqlConnection: SQLConnection,
-            handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        username: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun isExistsByUsernameOrEmail(
+        usernameOrEmail: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isLoginCorrect(
@@ -49,5 +55,24 @@ interface UserDao : Dao<User> {
         userID: Int,
         sqlConnection: SQLConnection,
         handler: (isVerified: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun makeEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun getEmailByID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (email: String?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun changePasswordByID(
+        userID: Int,
+        newPassword: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

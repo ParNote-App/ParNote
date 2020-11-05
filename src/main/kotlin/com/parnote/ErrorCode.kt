@@ -1,7 +1,7 @@
 package com.parnote
 
 enum class ErrorCode {
-    UNKNOWN_ERROR,
+    UNKNOWN_ERROR_1,
     UNKNOWN_ERROR_2,
     UNKNOWN_ERROR_3,
     UNKNOWN_ERROR_4,
@@ -10,7 +10,7 @@ enum class ErrorCode {
     UNKNOWN_ERROR_7,
     UNKNOWN_ERROR_8,
     UNKNOWN_ERROR_9,
-
+    UNKNOWN_ERROR_10,
 
     REGISTER_NAME_EMPTY,
     REGISTER_NAME_SHORT,

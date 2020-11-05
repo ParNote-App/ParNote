@@ -46,7 +46,7 @@ class RegisterAPI : Api() {
         validateForm(name, surname, username, email, password, termsBox, reCaptcha, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) { //db e erisim olmazsa null doner onu kontrol edip hatamizi veriyoruz
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_10))
                     return@createConnection
                 }
 

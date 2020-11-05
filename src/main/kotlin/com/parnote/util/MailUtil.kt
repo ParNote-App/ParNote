@@ -5,35 +5,77 @@ import com.parnote.db.DatabaseManager
 import com.parnote.model.Result
 import com.parnote.model.Successful
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.mail.MailClient
 import io.vertx.ext.mail.MailMessage
 import io.vertx.ext.sql.SQLConnection
+import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 
 object MailUtil {
-    enum class MilType(
-        val message: String,
-        val messageHTML: String,
+    enum class MailType(
         val tokenSubject: TokenUtil.SUBJECT,
-        val tokenAddress: String
+        val tokenAddress: String,
+        val templatePath: String,
+        val templateParametersByLanguage: Map<LangType, Map<String, Any>>
     ) {
         ACTIVATION(
-            "Hello, this is your activation link for your e-mail address: {0}",
-            "Hello, this is your activation link for your e-mail address: <a href=\"{0}\">Activate It</a>",
             TokenUtil.SUBJECT.VERIFY_MAIL,
-            "http://localhost:8080/activate?token={0}"
+            "/activate?token={0}",
+            "view/mail/VerifyEmailMail.hbs",
+            mapOf<LangType, Map<String, Any>>(
+                LangType.TR to mapOf<String, Any>(
+                    "subject" to "E-Mail Aktivasyonu",
+                    "template-params" to JsonObject()
+                ),
+                LangType.EN_US to mapOf<String, Any>(
+                    "subject" to "E-Mail Verification",
+                    "template-params" to JsonObject()
+                        .put("title", "Verify E-mail Address")
+                        .put("description", "To login your account, you need to verify this e-mail address.")
+                        .put("button-text", "Verify My E-Mail Address")
+                ),
+                LangType.HU to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
+                ),
+            )
         ),
         RESET_PASSWORD(
-            "Hello, here is your reset password link: {0}",
-            "Hello, here is your reset password link: <a href=\"{0}\">Reset Password</a>",
             TokenUtil.SUBJECT.RESET_PASSWORD,
-            "http://localhost:8080/reset-password?token={0}"
+            "/reset-password?token={0}",
+            "view/mail/ResetPasswordMail.hbs",
+            mapOf<LangType, Map<String, Any>>(
+                LangType.TR to mapOf<String, Any>(
+                    "subject" to "Şifre Sıfırla",
+                    "template-params" to JsonObject()
+                ),
+                LangType.EN_US to mapOf<String, Any>(
+                    "subject" to "Reset Password",
+                    "template-params" to JsonObject()
+                        .put("title", "Reset Password")
+                        .put("description", "If you didn't do this request, please change your password!")
+                        .put("button-text", "Reset My Password")
+                ),
+                LangType.HU to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
+                )
+            )
         )
+    }
+
+    enum class LangType {
+        TR,
+        EN_US,
+        HU
     }
 
     fun sendMail(
         userID: Int,
-        mailType: MilType,
+        mailType: MailType,
+        lang: LangType,
         sqlConnection: SQLConnection,
+        templateEngine: HandlebarsTemplateEngine,
         configManager: ConfigManager,
         databaseManager: DatabaseManager,
         mailClient: MailClient,
@@ -66,20 +108,38 @@ object MailUtil {
                 val activationLink = mailType.tokenAddress.format(token)
 
                 message.from = (configManager.getConfig()["email"] as Map<*, *>)["address"] as String
-                message.subject = "Mail Activation"
+                message.subject = mailType.templateParametersByLanguage.getValue(lang)["subject"] as String
                 message.setTo(email)
 
-                message.text = mailType.message.format(activationLink)
-                message.html = mailType.messageHTML.format(activationLink)
+                val templateEngineParams =
+                    mailType.templateParametersByLanguage.getValue(lang)["template-params"] as JsonObject
 
-                mailClient.sendMail(message) { sendMailResult ->
-                    if (sendMailResult.failed()) {
-                        handler.invoke(null, sendMailResult)
+                templateEngineParams.put("website-address", configManager.getConfig()["ui-address"] as String)
+                templateEngineParams.put("email-address", email)
+                templateEngineParams.put("link", activationLink)
 
-                        return@sendMail
+                templateEngine.render(
+                    templateEngineParams,
+                    (configManager.getConfig()["resourcesDir"] as String) + mailType.templatePath
+                ) { render ->
+                    if (render.failed()) {
+                        handler.invoke(null, render)
+
+                        return@render
                     }
 
-                    handler.invoke(Successful(), sendMailResult)
+                    message.text = render.result().toString()
+                    message.html = render.result().toString()
+
+                    mailClient.sendMail(message) { sendMailResult ->
+                        if (sendMailResult.failed()) {
+                            handler.invoke(null, sendMailResult)
+
+                            return@sendMail
+                        }
+
+                        handler.invoke(Successful(), sendMailResult)
+                    }
                 }
             }
         }

@@ -35,6 +35,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersionVariable")
     implementation("io.vertx:vertx-config:$vertxVersionVariable")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersionVariable")
+    implementation("io.vertx:vertx-web-templ-handlebars:$vertxVersionVariable")
 
     implementation("com.beust:klaxon:5.4")
     implementation("org.slf4j:slf4j-simple:1.7.30")
@@ -100,6 +101,10 @@ tasks {
             if (project.gradle.startParameter.taskNames.contains("buildDev"))
                 attributes(mapOf("MODE" to "DEVELOPMENT"))
         }
+    }
+
+    jar {
+        include("src/main/resources")
     }
 
     register("stage") {

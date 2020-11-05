@@ -11,6 +11,7 @@ import com.parnote.util.RegisterUtil
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
 /**
@@ -38,6 +39,9 @@ class RegisterAPI : Api() {
 
     @Inject
     lateinit var mailClient: MailClient
+
+    @Inject
+    lateinit var templateEngine: HandlebarsTemplateEngine
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
 
@@ -116,7 +120,16 @@ class RegisterAPI : Api() {
                                     return@getUserIDFromUsernameOrEmail
                                 }
 
-                                MailUtil.sendMail(userID, MailUtil.MailType.ACTIVATION, sqlConnection, configManager, databaseManager, mailClient) { _, _ ->
+                                MailUtil.sendMail(
+                                    userID,
+                                    MailUtil.MailType.ACTIVATION,
+                                    MailUtil.LangType.EN_US,
+                                    sqlConnection,
+                                    templateEngine,
+                                    configManager,
+                                    databaseManager,
+                                    mailClient
+                                ) { _, _ ->
                                     databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Successful())
                                     }

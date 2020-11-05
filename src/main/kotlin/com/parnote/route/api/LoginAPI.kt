@@ -5,7 +5,6 @@ import com.parnote.Main.Companion.getComponent
 import com.parnote.db.DatabaseManager
 import com.parnote.model.*
 import com.parnote.util.LoginUtil
-import com.sun.org.apache.bcel.internal.generic.RETURN
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject

@@ -3,15 +3,16 @@ package com.parnote.route.api
 
 import com.parnote.ErrorCode
 import com.parnote.Main
+import com.parnote.config.ConfigManager
 import com.parnote.db.DatabaseManager
 import com.parnote.model.*
+import com.parnote.util.MailUtil
 import de.triology.recaptchav2java.ReCaptcha
-
+import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class ResetPasswordAPI: Api() {
-
+class ResetPasswordAPI : Api() {
     override val routes = arrayListOf("/api/auth/ResetPasswordAPI")
 
     override val routeType = RouteType.POST
@@ -26,55 +27,107 @@ class ResetPasswordAPI: Api() {
     @Inject
     lateinit var reCaptcha: ReCaptcha
 
+    @Inject
+    lateinit var configManager: ConfigManager
+
+    @Inject
+    lateinit var mailClient: MailClient
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-
-
         val data = context.bodyAsJson
 
-        val emailOrUsername = data.getString("emailOrUsername")
-        val password = data.getString("password")
-        val forgotPassword = data.getBoolean("forgotPassword?")
+        val usernameOrEmail = data.getString("usernameOrEmail")
+        val reCaptcha = data.getString("recaptcha")
 
-        validateForm(emailOrUsername, password, forgotPassword, handler) {
+        validateForm(usernameOrEmail, reCaptcha, handler) {
+            databaseManager.createConnection { sqlConnection, _ ->
+                if (sqlConnection == null) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
 
+                    return@createConnection
+                }
+
+                databaseManager.getDatabase().userDao.isExistsByUsernameOrEmail(
+                    usernameOrEmail,
+                    sqlConnection
+                ) { exists, _ ->
+                    if (exists == null) {
+                        databaseManager.closeConnection(sqlConnection) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
+                        }
+
+                        return@isExistsByUsernameOrEmail
+                    }
+
+                    if (!exists) {
+                        databaseManager.closeConnection(sqlConnection) {
+                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_USER_NOT_EXISTS))
+                        }
+
+                        return@isExistsByUsernameOrEmail
+                    }
+
+                    databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
+                        usernameOrEmail,
+                        sqlConnection
+                    ) { userID, _ ->
+
+                        if (userID == null) {
+                            databaseManager.closeConnection(sqlConnection) {
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                            }
+
+                            return@getUserIDFromUsernameOrEmail
+                        }
+
+                        MailUtil.sendMail(
+                            userID,
+                            MailUtil.MilType.RESET_PASSWORD,
+                            sqlConnection,
+                            configManager,
+                            databaseManager,
+                            mailClient
+                        ) { result, _ ->
+                            if (result == null) {
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                }
+
+                                return@sendMail
+                            }
+
+                            handler.invoke(Successful())
+                        }
+                    }
+                }
+            }
         }
-
-        handler.invoke(Successful())
-
-
-
-        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
-
     }
 
+    private fun validateForm(
+        usernameOrEmail: String,
+        reCaptcha: String,
+        errorHandler: (result: Result) -> Unit,
+        successHandler: () -> Unit
+    ) {
+        if (usernameOrEmail.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
+            return
+        }
 
-    fun validateForm (emailOrUsername: String, password: String, forgotPassword: Boolean,  errorHandler : (result: Result) -> Unit, successHandler: () -> Unit
+        if (
+            !usernameOrEmail.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$")) && // user email regex
+            !usernameOrEmail.matches(Regex("^[a-zA-Z0-9]+\$")) // username regex
         ) {
-
-        if (password.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
             return
         }
 
-        if (password.length < 5) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_SHORT))
-            return
-        }
-
-        if (password.length > 30){
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_LONG))
-
-        }
-
-        if (!password.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.RESETPASSWORD_PASSWORD_INVALID))
+        if (!this.reCaptcha.isValid(reCaptcha)) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_RECAPTCHA_INVALID))
             return
         }
 
         successHandler.invoke()
     }
-
-
-
 }

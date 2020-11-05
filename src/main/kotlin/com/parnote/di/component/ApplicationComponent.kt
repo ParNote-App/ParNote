@@ -7,6 +7,7 @@ import com.parnote.di.module.*
 import com.parnote.model.LoggedInApi
 import com.parnote.route.api.RegisterAPI
 import com.parnote.route.api.ResetPasswordAPI
+import com.parnote.route.api.ResetPasswordPageAPI
 import dagger.Component
 import javax.inject.Singleton
 
@@ -34,4 +35,6 @@ interface ApplicationComponent {
     fun inject(resetPasswordAPI: ResetPasswordAPI)
 
     fun inject(loggedInApi: LoggedInApi)
+
+    fun inject(resetPasswordPageAPI: ResetPasswordPageAPI)
 }

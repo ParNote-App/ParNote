@@ -27,7 +27,7 @@ class EmailVerificationAPI : Api() {
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
 
                 return@createConnection
             }
@@ -61,7 +61,7 @@ class EmailVerificationAPI : Api() {
                     databaseManager.getDatabase().userDao.makeEmailVerifiedByID(userID, sqlConnection) { result, _ ->
                         databaseManager.closeConnection(sqlConnection) {
                             if (result == null) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
 
                                 return@closeConnection
                             }

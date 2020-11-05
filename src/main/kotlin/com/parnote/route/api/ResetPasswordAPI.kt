@@ -10,6 +10,7 @@ import com.parnote.util.MailUtil
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
 class ResetPasswordAPI : Api() {
@@ -32,6 +33,9 @@ class ResetPasswordAPI : Api() {
 
     @Inject
     lateinit var mailClient: MailClient
+
+    @Inject
+    lateinit var templateEngine: HandlebarsTemplateEngine
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
@@ -82,8 +86,10 @@ class ResetPasswordAPI : Api() {
 
                         MailUtil.sendMail(
                             userID,
-                            MailUtil.MilType.RESET_PASSWORD,
+                            MailUtil.MailType.RESET_PASSWORD,
+                            MailUtil.LangType.EN_US, // TODO get lang from remote
                             sqlConnection,
+                            templateEngine,
                             configManager,
                             databaseManager,
                             mailClient

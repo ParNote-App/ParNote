@@ -75,7 +75,6 @@ class ResetPasswordAPI : Api() {
                         usernameOrEmail,
                         sqlConnection
                     ) { userID, _ ->
-
                         if (userID == null) {
                             databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))

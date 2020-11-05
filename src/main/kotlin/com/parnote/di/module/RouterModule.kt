@@ -4,7 +4,9 @@ import com.parnote.model.Api
 import com.parnote.model.RouteType
 import com.parnote.model.Template
 import com.parnote.route.api.LoginAPI
+import com.parnote.route.api.RegisterAPI
 import com.parnote.route.api.ResetPasswordAPI
+import com.parnote.route.api.LogoutAPI
 import com.parnote.route.staticFolder.PublicFolder
 import com.parnote.route.template.IndexTemplate
 import dagger.Module
@@ -43,8 +45,10 @@ class RouterModule(private val mVertx: Vertx) {
 
     private val mAPIRouteList by lazy {
         arrayOf<Api>(
-            LoginAPI(),
-            ResetPasswordAPI()
+                LoginAPI(),
+                ResetPasswordAPI(),
+                RegisterAPI(),
+                LogoutAPI()
         )
     }
 

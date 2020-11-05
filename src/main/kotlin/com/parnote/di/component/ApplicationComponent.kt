@@ -6,6 +6,7 @@ import com.parnote.db.DatabaseMigration
 import com.parnote.di.module.*
 import com.parnote.model.LoggedInApi
 import com.parnote.route.api.EmailVerificationAPI
+import com.parnote.route.api.LogoutAPI
 import com.parnote.route.api.RegisterAPI
 import com.parnote.route.api.ResetPasswordAPI
 import dagger.Component
@@ -38,4 +39,6 @@ interface ApplicationComponent {
     fun inject(resetPasswordAPI: ResetPasswordAPI)
 
     fun inject(emailVerificationAPI: EmailVerificationAPI)
+
+    fun inject(logoutAPI: LogoutAPI)
 }

@@ -5,11 +5,7 @@ import com.parnote.db.DaoImpl
 import com.parnote.db.DatabaseMigration
 import com.parnote.di.module.*
 import com.parnote.model.LoggedInApi
-import com.parnote.route.api.EmailVerificationAPI
-import com.parnote.route.api.LogoutAPI
-import com.parnote.route.api.LoginAPI
-import com.parnote.route.api.RegisterAPI
-import com.parnote.route.api.ResetPasswordAPI
+import com.parnote.route.api.*
 import dagger.Component
 import javax.inject.Singleton
 
@@ -38,6 +34,8 @@ interface ApplicationComponent {
     fun inject(registerAPI: RegisterAPI)
 
     fun inject(resetPasswordAPI: ResetPasswordAPI)
+
+    fun inject(resetPasswordTokenAPI: ResetPasswordTokenAPI)
 
     fun inject(emailVerificationAPI: EmailVerificationAPI)
 

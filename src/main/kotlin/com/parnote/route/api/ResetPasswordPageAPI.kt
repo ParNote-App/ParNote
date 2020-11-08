@@ -32,10 +32,11 @@ class ResetPasswordPageAPI: Api() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
-        val newPassword = data.getString("resetPassword")
-        val newPasswordRepeat = data.getString("resetPassword")
+        val newPassword = data.getString("newPassword")
+        val newPasswordRepeat = data.getString("newPasswordRepeat")
+        val reCaptcha = data.getString("reCaptcha")
 
-        validateForm(newPassword, newPasswordRepeat, handler){
+        validateForm(newPassword, newPasswordRepeat, reCaptcha, handler){
         }
 
         handler.invoke(Successful())
@@ -43,7 +44,7 @@ class ResetPasswordPageAPI: Api() {
         handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
     }
 
-    fun validateForm(newPassword: String, newPasswordRepeat: String,
+    fun validateForm(newPassword: String, newPasswordRepeat: String, reCaptcha: String,
                      errorHandler: (result: Result) -> Unit, successHandler: () -> Unit) {
 
         //if (name)
@@ -61,12 +62,12 @@ class ResetPasswordPageAPI: Api() {
         }
 
         if(newPasswordRepeat.isEmpty()){
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_REPEAT_EMPTY))
             return
         }
 
         if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))){
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_INVALID))
+            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_REPEAT_INVALID))
             return
         }
 
@@ -74,6 +75,8 @@ class ResetPasswordPageAPI: Api() {
             errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_DOESNT_MATCH))
             return
         }
+
+
 
         successHandler.invoke()
     }

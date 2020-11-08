@@ -39,6 +39,7 @@ class RegisterAPI : Api() {
         val password = data.getString("password")
         val termsBox = data.getBoolean("termsBox")
 
+
         validateForm(name, surname, username, email, password, termsBox, handler) {
             /**databaseManager.getDatabase().""buraya validate'e gore .tablo ismi gelecek"" //bunun yerine userDao kullanilacak
             databaseManager.createConnection { connection, asyncResult ->
@@ -96,7 +97,7 @@ class RegisterAPI : Api() {
             return //error handleri bitirmek icin
         }
 
-//      if (password) md5 e cok takilma
+
 
         if (termsBox == false) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NOT_ACCEPTED_TERMS))

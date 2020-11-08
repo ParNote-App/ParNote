@@ -64,7 +64,17 @@ class ResetPasswordPageAPI : Api() {
                             return@getCreatedTimeByToken
                         }
 
+                        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+                            token,
+                            sqlConnection
+                        ) { userID, asyncResult ->
+                            if (userID == null) {
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                return@getUserIDFromToken
+                            }
 
+
+                        }
                     }
                 }
             }

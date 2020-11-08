@@ -7,6 +7,7 @@ enum class ErrorCode {
     UNKNOWN_ERROR_2,
     UNKNOWN_ERROR_3,
     UNKNOWN_ERROR_4,
+    UNKNOWN_ERROR_5,
 
     REGISTER_EMAIL_INVALID,
     REGISTER_USERNAME_EMPTY,
@@ -29,6 +30,7 @@ enum class ErrorCode {
     RECAPTCHA_NOT_VALID,
 
     TOKEN_IS_INVALID,
+
 
 
 }

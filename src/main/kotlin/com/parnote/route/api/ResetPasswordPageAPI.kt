@@ -6,6 +6,7 @@ import com.parnote.db.DatabaseManager
 import com.parnote.model.*
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -47,7 +48,24 @@ class ResetPasswordPageAPI : Api() {
                         handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
                         return@isTokenExists
                     }
+                    databaseManager.getDatabase().tokenDao.getCreatedTimeByToken(
+                        token,
+                        sqlConnection
+                    ) { createdTime, asyncResult ->
+                        if (createdTime == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                            return@getCreatedTimeByToken
+                        }
 
+                        val thirtyMinInMill = TimeUnit.MINUTES.toMillis(30)
+
+                        if (System.currentTimeMillis() > (createdTime + thirtyMinInMill)) {
+                            handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                            return@getCreatedTimeByToken
+                        }
+
+
+                    }
                 }
             }
 

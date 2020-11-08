@@ -20,10 +20,10 @@ class ResetPasswordPageAPI : Api() {
     }
 
     @Inject
-    lateinit var databaseManager: DatabaseManager //db manageri cagirdik
+    lateinit var databaseManager: DatabaseManager
 
     @Inject
-    lateinit var reCaptcha: ReCaptcha //ReCaptchayi cagirdik
+    lateinit var reCaptcha: ReCaptcha
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
@@ -34,56 +34,85 @@ class ResetPasswordPageAPI : Api() {
         val token = data.getString("token")
 
         validateForm(newPassword, newPasswordRepeat, reCaptcha, token, handler) {
-            databaseManager.createConnection { sqlConnection, asyncResult ->
+            databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) {
                     handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
+
                     return@createConnection
                 }
-                databaseManager.getDatabase().tokenDao.isTokenExists(token, sqlConnection) { exists, asyncResult ->
+
+                databaseManager.getDatabase().tokenDao.isTokenExists(token, sqlConnection) { exists, _ ->
                     if (exists == null) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                        databaseManager.closeConnection(sqlConnection) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                        }
+
                         return@isTokenExists
                     }
+
                     if (!exists) {
-                        handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                        databaseManager.closeConnection(sqlConnection){
+                            handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                        }
+
                         return@isTokenExists
                     }
                     databaseManager.getDatabase().tokenDao.getCreatedTimeByToken(
                         token,
                         sqlConnection
-                    ) { createdTime, asyncResult ->
+                    ) { createdTime, _ ->
                         if (createdTime == null) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                            databaseManager.closeConnection(sqlConnection){
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                            }
+
+
                             return@getCreatedTimeByToken
                         }
 
                         val thirtyMinInMill = TimeUnit.MINUTES.toMillis(30)
 
                         if (System.currentTimeMillis() > (createdTime + thirtyMinInMill)) {
-                            handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                            databaseManager.closeConnection(sqlConnection){
+                                handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                            }
+
                             return@getCreatedTimeByToken
                         }
 
                         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                             token,
                             sqlConnection
-                        ) { userID, asyncResult ->
+                        ) { userID, _ ->
                             if (userID == null) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                }
+
                                 return@getUserIDFromToken
                             }
 
+                            databaseManager.getDatabase().userDao.changePasswordByID(
+                                userID,
+                                newPassword,
+                                sqlConnection
+                            ) { result, _ ->
+                               databaseManager.closeConnection(sqlConnection) {
+                                   if (result == null) {
+                                       handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
 
+                                       return@closeConnection
+                                   }
+
+                                   handler.invoke(Successful())
+                               }
+                            }
                         }
                     }
                 }
             }
 
         }
-
-//        handler.invoke(Successful())
-//
-//        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
     }
 
     fun validateForm(

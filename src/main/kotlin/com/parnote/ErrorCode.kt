@@ -4,6 +4,9 @@ package com.parnote
 enum class ErrorCode {
     SCHEME_VERSION_ADD_ERROR,
     UNKNOWN_ERROR,
+    UNKNOWN_ERROR_2,
+    UNKNOWN_ERROR_3,
+    UNKNOWN_ERROR_4,
 
     REGISTER_EMAIL_INVALID,
     REGISTER_USERNAME_EMPTY,
@@ -24,6 +27,8 @@ enum class ErrorCode {
     NEWPASSWORD_REPEAT_INVALID,
 
     RECAPTCHA_NOT_VALID,
+
+    TOKEN_IS_INVALID,
 
 
 }

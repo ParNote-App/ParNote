@@ -9,7 +9,9 @@ import com.parnote.model.*
 import com.parnote.util.MailUtil
 import com.parnote.util.RegisterUtil
 import de.triology.recaptchav2java.ReCaptcha
+import io.vertx.core.AsyncResult
 import io.vertx.ext.mail.MailClient
+import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
@@ -44,7 +46,6 @@ class RegisterAPI : Api() {
     lateinit var templateEngine: HandlebarsTemplateEngine
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-
         val data = context.bodyAsJson //contextin bodysini alip jsona cevirdik
 
         val name = data.getString("name") //body den sadece string olarak name i aldim
@@ -56,118 +57,23 @@ class RegisterAPI : Api() {
         val reCaptcha = data.getString("recaptcha")
         val ipAddress = context.request().remoteAddress().host()
 
-        validateForm(name, surname, username, email, password, termsBox, reCaptcha, handler) {
-            databaseManager.createConnection { sqlConnection, _ ->
-                if (sqlConnection == null) { //db e erisim olmazsa null doner onu kontrol edip hatamizi veriyoruz
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_10))
-                    return@createConnection
-                }
-
-                databaseManager.getDatabase().userDao.isEmailExists(email, sqlConnection) { emailExists, _ ->
-                    if (emailExists == null) {
-                        //db connectionu kesmek icin !!createConn kesme!!
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_1))
-                        }
-
-                        return@isEmailExists
-                    }
-
-                    if (emailExists) {
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.TAKEN_EMAIL_ERROR))
-                        }
-
-                        return@isEmailExists
-                    }
-
-                    databaseManager.getDatabase().userDao.isUsernameExists(username, sqlConnection) { usernameExists, _ ->
-                        if (usernameExists == null) {
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
-                            }
-
-                            return@isUsernameExists
-                        }
-
-                        if (usernameExists) {
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.TAKEN_USERNAME_ERROR))
-                            }
-
-                            return@isUsernameExists
-                        }
-
-                        // şuraya kadar geldiyse
-                        // hiç bir şey de sorun yok
-                        // şimdi geldik adamı kaydetmeye
-
-                        RegisterUtil.register(databaseManager, User(-1, username, email, password, ipAddress), sqlConnection) { isEnrolled ->
-                            if (isEnrolled == null) {
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
-                                }
-
-                                return@register
-                            }
-
-                            databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(username, sqlConnection) { userID, _ ->
-                                if (userID == null) {
-                                    databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
-                                    }
-
-                                    return@getUserIDFromUsernameOrEmail
-                                }
-
-                                MailUtil.sendMail(
-                                    userID,
-                                    MailUtil.MailType.ACTIVATION,
-                                    MailUtil.LangType.EN_US,
-                                    sqlConnection,
-                                    templateEngine,
-                                    configManager,
-                                    databaseManager,
-                                    mailClient
-                                ) { _, _ ->
-                                    databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Successful())
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        validateForm(
+            name,
+            surname,
+            username,
+            email,
+            password,
+            termsBox,
+            reCaptcha,
+            handler,
+            (this::validateFormHandler)(handler, email, username, password, ipAddress)
+        )
     }
 
-
-    /**databaseManager.getDatabase().""buraya validate'e gore .tablo ismi gelecek"" //bunun yerine userDao kullanilacak
-    databaseManager.createConnection { connection, asyncResult ->
-    databaseManager.getDatabase().userDao.isEmailExists(email, connection) { exists ->
-    } //emailin varligini kontrol eder
-     */
-
-
-    /**context.response().end(
-    JsonObject(
-    mapOf(
-    "Result" to "OKAY!"
-    )
-    ).toJsonString()) //Api cevapliyor ama biz bunu ustteki handler: olmazsa diye yazdik*/
-
-//    handler.invoke(Successful()) // usttekinin aynisini yapiyor bunu tercih et
-    /** handler ile isin bittiginde hep bunu kullanmak zorundasin mesela varolan kullanici adi
-     * uzerine aynisi olusturulmaya calisildi diyelim db de kontrol edildi ardindan cakisma varsa hata donecek ve handler
-     * ile bitiricem !!handler sonda olmak zzorunda degildir*/
-
-//    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR))
-    /** Hata mesaj kodu olusturduk ama bunu util->ErrorCode classina belirttik hata kodunu*/
-
-
-    fun validateForm(name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
-                     reCaptcha: String, errorHandler: (result: Result) -> Unit, successHandler: () -> Unit) {
+    private fun validateForm(
+        name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
+        reCaptcha: String, errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
+    ) {
 
         if (name.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_EMPTY))
@@ -259,5 +165,156 @@ class RegisterAPI : Api() {
         }
 
         successHandler.invoke()
+    }
+
+    private fun validateFormHandler(
+        handler: (result: Result) -> Unit,
+        email: String,
+        username: String,
+        password: String,
+        ipAddress: String
+    ) = { ->
+        databaseManager.createConnection((this::createConnectionHandler)(handler, email, username, password, ipAddress))
+    }
+
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        email: String,
+        username: String,
+        password: String,
+        ipAddress: String
+    ) = handler@{ sqlConnection: SQLConnection?, _: AsyncResult<SQLConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_10))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.isEmailExists(
+            email,
+            sqlConnection,
+            (this::isEmailExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+        )
+    }
+
+    private fun isEmailExistsHandler(
+        handler: (result: Result) -> Unit,
+        email: String,
+        username: String,
+        password: String,
+        ipAddress: String,
+        sqlConnection: SQLConnection
+    ) = handler@{ emailExists: Boolean?, _: AsyncResult<*> ->
+        if (emailExists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_1))
+            }
+
+            return@handler
+        }
+
+        if (emailExists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.TAKEN_EMAIL_ERROR))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.isUsernameExists(
+            username,
+            sqlConnection,
+            (this::isUsernameExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+        )
+    }
+
+    private fun isUsernameExistsHandler(
+        handler: (result: Result) -> Unit,
+        email: String,
+        username: String,
+        password: String,
+        ipAddress: String,
+        sqlConnection: SQLConnection
+    ) = handler@{ usernameExists: Boolean?, _: AsyncResult<*> ->
+        if (usernameExists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
+            }
+
+            return@handler
+        }
+
+        if (usernameExists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.TAKEN_USERNAME_ERROR))
+            }
+
+            return@handler
+        }
+
+        // şuraya kadar geldiyse
+        // hiç bir şey de sorun yok
+        // şimdi geldik adamı kaydetmeye
+
+        RegisterUtil.register(
+            databaseManager,
+            User(-1, username, email, password, ipAddress),
+            sqlConnection,
+            (this::registerHandler)(handler, username, sqlConnection)
+        )
+    }
+
+    private fun registerHandler(
+        handler: (result: Result) -> Unit,
+        username: String,
+        sqlConnection: SQLConnection
+    ) = handler@{ isEnrolled: Result? ->
+        if (isEnrolled == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
+            username,
+            sqlConnection,
+            (this::getUserIDFromUsernameOrEmailHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun getUserIDFromUsernameOrEmailHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SQLConnection
+    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
+        if (userID == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+            }
+
+            return@handler
+        }
+
+        MailUtil.sendMail(
+            userID,
+            MailUtil.MailType.ACTIVATION,
+            MailUtil.LangType.EN_US,
+            sqlConnection,
+            templateEngine,
+            configManager,
+            databaseManager,
+            mailClient,
+            (this::sendMailHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun sendMailHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SQLConnection
+    ) = handler@{ _: Result?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            handler.invoke(Successful())
+        }
     }
 }

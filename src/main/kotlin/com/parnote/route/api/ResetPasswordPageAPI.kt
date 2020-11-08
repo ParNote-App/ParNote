@@ -76,6 +76,11 @@ class ResetPasswordPageAPI: Api() {
             return
         }
 
+        if (!this.reCaptcha.isValid(reCaptcha)) {
+            errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+            return
+        }
+
 
 
         successHandler.invoke()

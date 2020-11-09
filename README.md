@@ -4,6 +4,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/maintenance/yes/2020?style=for-the-badge" alt="Maintained">
+  <a href="https://travis-ci.com/github/ParNote-App/ParNote" target="_blank"><img src="https://img.shields.io/travis/com/ParNote-App/ParNote/dev?style=for-the-badge" alt="Travis CI Build Status"></a>
   <a href="https://github.com/ParNote-App/ParNote/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/kahverengi001/SystemEngineeringWork1?style=for-the-badge" alt="License"></a>
 </p>
 

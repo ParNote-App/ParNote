@@ -9,9 +9,8 @@ import io.vertx.ext.web.RoutingContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-
 class ResetPasswordPageAPI : Api() {
-    override val routes = arrayListOf("/api/auth/resetPasswordPageAPI")
+    override val routes = arrayListOf("/api/auth/resetPasswordPage")
 
     override val routeType = RouteType.POST
 
@@ -51,7 +50,7 @@ class ResetPasswordPageAPI : Api() {
                     }
 
                     if (!exists) {
-                        databaseManager.closeConnection(sqlConnection){
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
                         }
 
@@ -62,7 +61,7 @@ class ResetPasswordPageAPI : Api() {
                         sqlConnection
                     ) { createdTime, _ ->
                         if (createdTime == null) {
-                            databaseManager.closeConnection(sqlConnection){
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
                             }
 
@@ -73,7 +72,7 @@ class ResetPasswordPageAPI : Api() {
                         val thirtyMinInMill = TimeUnit.MINUTES.toMillis(30)
 
                         if (System.currentTimeMillis() > (createdTime + thirtyMinInMill)) {
-                            databaseManager.closeConnection(sqlConnection){
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
                             }
 
@@ -97,15 +96,15 @@ class ResetPasswordPageAPI : Api() {
                                 newPassword,
                                 sqlConnection
                             ) { result, _ ->
-                               databaseManager.closeConnection(sqlConnection) {
-                                   if (result == null) {
-                                       handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
+                                databaseManager.closeConnection(sqlConnection) {
+                                    if (result == null) {
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
 
-                                       return@closeConnection
-                                   }
+                                        return@closeConnection
+                                    }
 
-                                   handler.invoke(Successful())
-                               }
+                                    handler.invoke(Successful())
+                                }
                             }
                         }
                     }
@@ -122,38 +121,37 @@ class ResetPasswordPageAPI : Api() {
         token: String,
         errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
     ) {
-        // token null check > UNKNOWN_ERROR_ bir tane de numara
         if (token.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
             return
         }
 
         if (newPassword.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_EMPTY))
 
             return
         }
 
         if (newPasswordRepeat.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_REPEAT_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_REPEAT_EMPTY))
 
             return
         }
 
         if (newPassword != newPasswordRepeat) {
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_DOESNT_MATCH))
+            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_DOESNT_MATCH))
 
             return
         }
 
-        if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))){
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_INVALID))
+        if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))) {
+            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_INVALID))
 
             return
         }
 
         if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.NEWPASSWORD_REPEAT_INVALID))
+            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_REPEAT_INVALID))
 
             return
         }

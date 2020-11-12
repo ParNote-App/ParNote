@@ -42,11 +42,12 @@ class RouterModule(private val mVertx: Vertx) {
 
     private val mAPIRouteList by lazy {
         arrayOf<Api>(
-                LoginAPI(),
-                ResetPasswordAPI(),
-                RegisterAPI(),
-                LogoutAPI(),
-                ResetPasswordTokenAPI(),
+            LoginAPI(),
+            ResetPasswordAPI(),
+            RegisterAPI(),
+            LogoutAPI(),
+            ResetPasswordTokenAPI(),
+            ResetPasswordPageAPI()
         )
     }
 

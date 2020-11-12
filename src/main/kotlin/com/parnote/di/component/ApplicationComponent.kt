@@ -42,4 +42,6 @@ interface ApplicationComponent {
     fun inject(logoutAPI: LogoutAPI)
 
     fun inject(loginAPI: LoginAPI)
+
+    fun inject(resetPasswordPageAPI: ResetPasswordPageAPI)
 }

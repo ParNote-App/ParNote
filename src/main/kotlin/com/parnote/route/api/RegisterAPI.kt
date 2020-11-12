@@ -16,25 +16,20 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
-/**
- * double shift yap, RouterModule.kt ye git, mAPIRouteList i bul ve classini icine oradakiler gibi ekle
- * AMACI Apinin calismasini saglamak
- */
-
 class RegisterAPI : Api() {
-    override val routes = arrayListOf("/api/auth/registerAPI")
+    override val routes = arrayListOf("/api/auth/register")
 
-    override val routeType = RouteType.POST //Yapilacak islemin methodunu belirtiyorsun
+    override val routeType = RouteType.POST
 
     init {
-        getComponent().inject(this) //modulu inject ediyor. ctrl ile injecte git, classini injectle birnevi bagladik classimizi
+        getComponent().inject(this)
     }
 
     @Inject
-    lateinit var databaseManager: DatabaseManager //db manageri cagirdik
+    lateinit var databaseManager: DatabaseManager
 
     @Inject
-    lateinit var reCaptcha: ReCaptcha //ReCaptchayi cagirdik
+    lateinit var reCaptcha: ReCaptcha
 
     @Inject
     lateinit var configManager: ConfigManager
@@ -46,9 +41,9 @@ class RegisterAPI : Api() {
     lateinit var templateEngine: HandlebarsTemplateEngine
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val data = context.bodyAsJson //contextin bodysini alip jsona cevirdik
+        val data = context.bodyAsJson
 
-        val name = data.getString("name") //body den sadece string olarak name i aldim
+        val name = data.getString("name")
         val surname = data.getString("surname")
         val username = data.getString("username")
         val email = data.getString("email")
@@ -140,9 +135,9 @@ class RegisterAPI : Api() {
             return
         }
 
-        if (!email.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {//email kosullarimiza uymuyor
-            errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_INVALID)) //Error donuyoruz
-            return //error handleri bitirmek icin
+        if (!email.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
+            errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_INVALID))
+            return
         }
 
         if (password.isEmpty()) {
@@ -251,10 +246,6 @@ class RegisterAPI : Api() {
 
             return@handler
         }
-
-        // şuraya kadar geldiyse
-        // hiç bir şey de sorun yok
-        // şimdi geldik adamı kaydetmeye
 
         RegisterUtil.register(
             databaseManager,

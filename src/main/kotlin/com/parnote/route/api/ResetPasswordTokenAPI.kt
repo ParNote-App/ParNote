@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class ResetPasswordTokenAPI : Api() {
 
-    override val routes = arrayListOf("/api/auth/ResetPasswordTokenAPI")
+    override val routes = arrayListOf("/api/token/check/resetPassword")
 
     override val routeType = RouteType.POST
 
@@ -43,7 +43,7 @@ class ResetPasswordTokenAPI : Api() {
 
                     val minutesInMills = TimeUnit.MINUTES.toMillis(30) // 30 minutes
 
-                    if (System.currentTimeMillis() > (createdTime + minutesInMills)) { // şu anki zaman >= (oluşturulan zaman'ın 30 dk sonrası)
+                    if (System.currentTimeMillis() > (createdTime + minutesInMills)) {
                         handler.invoke(Error(ErrorCode.EXPIRED_TOKEN_VALIDATION))
 
                         return@closeConnection

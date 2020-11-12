@@ -14,7 +14,7 @@ import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
 class ResetPasswordAPI : Api() {
-    override val routes = arrayListOf("/api/auth/ResetPasswordAPI")
+    override val routes = arrayListOf("/api/auth/resetPassword")
 
     override val routeType = RouteType.POST
 

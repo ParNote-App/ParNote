@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 
 class LoginAPI : Api() {
-    override val routes: ArrayList<String> = arrayListOf("/api/auth/loginAPI")
+    override val routes: ArrayList<String> = arrayListOf("/api/auth/login")
 
     override val routeType = RouteType.POST
 

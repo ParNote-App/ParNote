@@ -11,7 +11,7 @@ import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
 class LogoutAPI : Api() {
-    override val routes = arrayListOf("/api/auth/logoutAPI")
+    override val routes = arrayListOf("/api/auth/logout")
 
     override val routeType = RouteType.POST
 

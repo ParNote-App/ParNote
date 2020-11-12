@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
 class EmailVerificationAPI : Api() {
-    override val routes = arrayListOf("/api/auth/EmailVerificationAPI")
+    override val routes = arrayListOf("/api/auth/emailVerification")
 
     override val routeType = RouteType.POST
 

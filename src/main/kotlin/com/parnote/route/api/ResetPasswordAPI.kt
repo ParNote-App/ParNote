@@ -122,7 +122,7 @@ class ResetPasswordAPI : Api() {
 
         if (
             !usernameOrEmail.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$")) && // user email regex
-            !usernameOrEmail.matches(Regex("^[a-zA-Z0-9]+\$")) // username regex
+            !usernameOrEmail.matches(Regex("^[a-zA-Z0-9_]+\$")) // username regex
         ) {
             errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
 

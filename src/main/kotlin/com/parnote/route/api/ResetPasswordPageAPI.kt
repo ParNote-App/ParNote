@@ -143,13 +143,13 @@ class ResetPasswordPageAPI : Api() {
             return
         }
 
-        if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))) {
+        if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
             errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_INVALID))
 
             return
         }
 
-        if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}\$"))) {
+        if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
             errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_REPEAT_INVALID))
 
             return

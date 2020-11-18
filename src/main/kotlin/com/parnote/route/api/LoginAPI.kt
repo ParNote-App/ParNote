@@ -48,7 +48,7 @@ class LoginAPI : Api() {
                 ) { exists, _ ->
                     if (exists == null) {
                         databaseManager.closeConnection(sqlConnection){
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_26))
                         }
 
                         return@isExistsByUsernameOrEmail
@@ -67,7 +67,7 @@ class LoginAPI : Api() {
                     ) { userID, _ ->
                         if (userID == null) {
                             databaseManager.closeConnection(sqlConnection){
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_22))
                             }
 
                             return@getUserIDFromUsernameOrEmail

@@ -35,7 +35,7 @@ class ResetPasswordPageAPI : Api() {
         validateForm(newPassword, newPasswordRepeat, reCaptcha, token, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_14))
 
                     return@createConnection
                 }
@@ -43,7 +43,7 @@ class ResetPasswordPageAPI : Api() {
                 databaseManager.getDatabase().tokenDao.isTokenExists(token, sqlConnection) { exists, _ ->
                     if (exists == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_16))
                         }
 
                         return@isTokenExists
@@ -62,7 +62,7 @@ class ResetPasswordPageAPI : Api() {
                     ) { createdTime, _ ->
                         if (createdTime == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_19))
                             }
 
 
@@ -85,7 +85,7 @@ class ResetPasswordPageAPI : Api() {
                         ) { userID, _ ->
                             if (userID == null) {
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_21))
                                 }
 
                                 return@getUserIDFromToken
@@ -98,7 +98,7 @@ class ResetPasswordPageAPI : Api() {
                             ) { result, _ ->
                                 databaseManager.closeConnection(sqlConnection) {
                                     if (result == null) {
-                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_23))
 
                                         return@closeConnection
                                     }
@@ -122,7 +122,7 @@ class ResetPasswordPageAPI : Api() {
         errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
     ) {
         if (token.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
+            errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_12))
             return
         }
 

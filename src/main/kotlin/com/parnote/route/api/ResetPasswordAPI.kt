@@ -46,7 +46,7 @@ class ResetPasswordAPI : Api() {
         validateForm(usernameOrEmail, reCaptcha, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_8))
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_24))
 
                     return@createConnection
                 }
@@ -77,7 +77,7 @@ class ResetPasswordAPI : Api() {
                     ) { userID, _ ->
                         if (userID == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_18))
                             }
 
                             return@getUserIDFromUsernameOrEmail
@@ -95,7 +95,7 @@ class ResetPasswordAPI : Api() {
                         ) { result, _ ->
                             if (result == null) {
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_20))
                                 }
 
                                 return@sendMail

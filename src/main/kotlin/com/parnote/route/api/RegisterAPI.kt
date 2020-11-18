@@ -233,7 +233,7 @@ class RegisterAPI : Api() {
     ) = handler@{ usernameExists: Boolean?, _: AsyncResult<*> ->
         if (usernameExists == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_13))
             }
 
             return@handler
@@ -262,7 +262,7 @@ class RegisterAPI : Api() {
     ) = handler@{ isEnrolled: Result? ->
         if (isEnrolled == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_15))
             }
 
             return@handler
@@ -281,7 +281,7 @@ class RegisterAPI : Api() {
     ) = handler@{ userID: Int?, _: AsyncResult<*> ->
         if (userID == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_17))
             }
 
             return@handler

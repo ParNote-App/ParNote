@@ -1,6 +1,5 @@
 package com.parnote.route.api
 
-
 import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.config.ConfigManager
@@ -93,15 +92,15 @@ class ResetPasswordAPI : Api() {
                             databaseManager,
                             mailClient
                         ) { result, _ ->
-                            if (result == null) {
-                                databaseManager.closeConnection(sqlConnection) {
+                            databaseManager.closeConnection(sqlConnection) {
+                                if (result == null) {
                                     handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_20))
+
+                                    return@closeConnection
                                 }
 
-                                return@sendMail
+                                handler.invoke(Successful())
                             }
-
-                            handler.invoke(Successful())
                         }
                     }
                 }
@@ -117,6 +116,7 @@ class ResetPasswordAPI : Api() {
     ) {
         if (usernameOrEmail.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
+
             return
         }
 
@@ -125,11 +125,13 @@ class ResetPasswordAPI : Api() {
             !usernameOrEmail.matches(Regex("^[a-zA-Z0-9]+\$")) // username regex
         ) {
             errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
+
             return
         }
 
         if (!this.reCaptcha.isValid(reCaptcha)) {
             errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_RECAPTCHA_INVALID))
+
             return
         }
 

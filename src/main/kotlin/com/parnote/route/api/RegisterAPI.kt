@@ -106,13 +106,13 @@ class RegisterAPI : Api() {
             return
         }
 
-        if (!name.matches(Regex("^[A-Za-z0-9_-]*$"))) {
+        if (!name.matches(Regex("^[A-Za-z ]*$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_INVALID))
 
             return
         }
 
-        if (!surname.matches(Regex("^[A-Za-z0-9_-]*$"))) {
+        if (!surname.matches(Regex("^[A-Za-z]*$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_INVALID))
 
             return

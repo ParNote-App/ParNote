@@ -50,6 +50,7 @@ class RegisterAPI : Api() {
         val password = data.getString("password")
         val termsBox = data.getBoolean("termsBox")
         val reCaptcha = data.getString("recaptcha")
+
         val ipAddress = context.request().remoteAddress().host()
 
         validateForm(
@@ -69,93 +70,111 @@ class RegisterAPI : Api() {
         name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
         reCaptcha: String, errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
     ) {
-
         if (name.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_EMPTY))
+
             return
         }
 
         if (name.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SHORT))
+
             return
         }
 
         if (name.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_LONG))
+
             return
         }
 
         if (surname.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_EMPTY))
+
             return
         }
 
         if (surname.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_SHORT))
+
             return
         }
 
         if (surname.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_LONG))
+
             return
         }
 
         if (!name.matches(Regex("^[A-Za-z0-9_-]*$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_INVALID))
+
             return
         }
 
         if (!surname.matches(Regex("^[A-Za-z0-9_-]*$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_INVALID))
-        }
 
+            return
+        }
 
         if (username.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_EMPTY))
+
             return
         }
 
         if (username.length < 3) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_SHORT))
+
             return
         }
 
         if (username.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_LONG))
+
             return
         }
 
         if (!username.matches(Regex("^[a-zA-Z0-9_]+\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_INVALID))
+
             return
         }
 
         if (email.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_EMPTY))
+
             return
         }
 
         if (!email.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_INVALID))
+
             return
         }
 
         if (password.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_EMPTY))
+
             return
         }
 
         if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_INVALID))
+
+            return
         }
 
         if (!termsBox) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NOT_ACCEPTED_TERMS))
+
             return
         }
 
         if (!this.reCaptcha.isValid(reCaptcha)) {
             errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+
             return
         }
 

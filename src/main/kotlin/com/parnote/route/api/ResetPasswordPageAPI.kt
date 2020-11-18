@@ -65,7 +65,6 @@ class ResetPasswordPageAPI : Api() {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_19))
                             }
 
-
                             return@getCreatedTimeByToken
                         }
 
@@ -110,11 +109,10 @@ class ResetPasswordPageAPI : Api() {
                     }
                 }
             }
-
         }
     }
 
-    fun validateForm(
+    private fun validateForm(
         newPassword: String,
         newPasswordRepeat: String,
         reCaptcha: String,
@@ -123,6 +121,7 @@ class ResetPasswordPageAPI : Api() {
     ) {
         if (token.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_12))
+
             return
         }
 

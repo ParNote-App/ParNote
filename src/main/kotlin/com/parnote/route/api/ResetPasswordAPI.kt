@@ -130,7 +130,7 @@ class ResetPasswordAPI : Api() {
         }
 
         if (!this.reCaptcha.isValid(reCaptcha)) {
-            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_RECAPTCHA_INVALID))
+            errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
 
             return
         }

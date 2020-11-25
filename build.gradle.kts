@@ -1,7 +1,7 @@
 plugins {
     java
-    kotlin("jvm") version "1.4.10"
-    kotlin("kapt") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
+    kotlin("kapt") version "1.4.20"
     id("io.vertx.vertx-plugin") version "1.1.3"
 }
 

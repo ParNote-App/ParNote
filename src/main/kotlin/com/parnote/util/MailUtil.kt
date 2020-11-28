@@ -20,7 +20,7 @@ object MailUtil {
     ) {
         ACTIVATION(
             TokenUtil.SUBJECT.VERIFY_MAIL,
-            "/activate?token={0}",
+            "/activate?token=%s",
             "view/mail/VerifyEmailMail.hbs",
             mapOf<LangType, Map<String, Any>>(
                 LangType.TR to mapOf<String, Any>(
@@ -42,7 +42,7 @@ object MailUtil {
         ),
         RESET_PASSWORD(
             TokenUtil.SUBJECT.RESET_PASSWORD,
-            "/reset-password?token={0}",
+            "/reset-password?token=%s",
             "view/mail/ResetPasswordMail.hbs",
             mapOf<LangType, Map<String, Any>>(
                 LangType.TR to mapOf<String, Any>(

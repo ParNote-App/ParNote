@@ -61,7 +61,7 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                     ),
 
                     "resourcesDir" to "src/main/resources/",
-                    "ui-address" to "localhost:5000"
+                    "ui-address" to "http://localhost:5000"
                 )
             )
         }

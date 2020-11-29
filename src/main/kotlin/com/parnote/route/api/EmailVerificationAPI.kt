@@ -5,6 +5,7 @@ import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.db.DatabaseManager
 import com.parnote.model.*
+import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -20,10 +21,20 @@ class EmailVerificationAPI : Api() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
+    @Inject
+    lateinit var reCaptcha: ReCaptcha
+
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val token = data.getString("token")
+        val reCaptcha = data.getString("recaptcha")
+
+        if (!this.reCaptcha.isValid(reCaptcha)) {
+            handler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+
+            return
+        }
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {

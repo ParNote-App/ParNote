@@ -3,14 +3,16 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.db.DatabaseManager
+import com.parnote.db.model.Token
 import com.parnote.model.*
+import com.parnote.util.TokenUtil
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class ResetPasswordPageAPI : Api() {
-    override val routes = arrayListOf("/api/auth/resetPasswordPage")
+class ResetPasswordAPI : Api() {
+    override val routes = arrayListOf("/api/auth/resetPassword")
 
     override val routeType = RouteType.POST
 
@@ -71,8 +73,23 @@ class ResetPasswordPageAPI : Api() {
                         val thirtyMinInMill = TimeUnit.MINUTES.toMillis(30)
 
                         if (System.currentTimeMillis() > (createdTime + thirtyMinInMill)) {
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                            databaseManager.getDatabase().tokenDao.delete(
+                                Token(
+                                    -1,
+                                    token,
+                                    -1,
+                                    TokenUtil.SUBJECT.RESET_PASSWORD.toString()
+                                ), sqlConnection
+                            ) { resultOfDeleteToken, _ ->
+                                databaseManager.closeConnection(sqlConnection) {
+                                    if (resultOfDeleteToken == null) {
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
+
+                                        return@closeConnection
+                                    }
+
+                                    handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                                }
                             }
 
                             return@getCreatedTimeByToken
@@ -95,14 +112,31 @@ class ResetPasswordPageAPI : Api() {
                                 newPassword,
                                 sqlConnection
                             ) { result, _ ->
-                                databaseManager.closeConnection(sqlConnection) {
-                                    if (result == null) {
+                                if (result == null) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_23))
-
-                                        return@closeConnection
                                     }
 
-                                    handler.invoke(Successful())
+                                    return@changePasswordByID
+                                }
+
+                                databaseManager.getDatabase().tokenDao.delete(
+                                    Token(
+                                        -1,
+                                        token,
+                                        -1,
+                                        TokenUtil.SUBJECT.RESET_PASSWORD.toString()
+                                    ), sqlConnection
+                                ) { resultOfDeleteToken, _ ->
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        if (resultOfDeleteToken == null) {
+                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
+
+                                            return@closeConnection
+                                        }
+
+                                        handler.invoke(Successful())
+                                    }
                                 }
                             }
                         }
@@ -117,7 +151,8 @@ class ResetPasswordPageAPI : Api() {
         newPasswordRepeat: String,
         reCaptcha: String,
         token: String,
-        errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
+        errorHandler: (result: Result) -> Unit,
+        successHandler: () -> Unit
     ) {
         if (token.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_12))

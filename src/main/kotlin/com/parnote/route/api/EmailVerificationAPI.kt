@@ -73,7 +73,9 @@ class EmailVerificationAPI : Api() {
 
                     databaseManager.getDatabase().userDao.makeEmailVerifiedByID(userID, sqlConnection) { result, _ ->
                         if (result == null) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
+                            databaseManager.closeConnection(sqlConnection) {
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
+                            }
 
                             return@makeEmailVerifiedByID
                         }

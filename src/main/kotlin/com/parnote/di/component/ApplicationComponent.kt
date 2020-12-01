@@ -33,7 +33,7 @@ interface ApplicationComponent {
 
     fun inject(registerAPI: RegisterAPI)
 
-    fun inject(resetPasswordAPI: ResetPasswordAPI)
+    fun inject(resetPasswordAPI: ForgotPasswordAPI)
 
     fun inject(resetPasswordTokenAPI: ResetPasswordTokenAPI)
 

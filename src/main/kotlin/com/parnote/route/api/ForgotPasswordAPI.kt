@@ -12,8 +12,8 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
-class ResetPasswordAPI : Api() {
-    override val routes = arrayListOf("/api/auth/resetPassword")
+class ForgotPasswordAPI : Api() {
+    override val routes = arrayListOf("/api/auth/forgotPassword")
 
     override val routeType = RouteType.POST
 
@@ -64,7 +64,7 @@ class ResetPasswordAPI : Api() {
 
                     if (!exists) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_USER_NOT_EXISTS))
+                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
                         }
 
                         return@isExistsByUsernameOrEmail

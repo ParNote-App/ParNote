@@ -4,7 +4,9 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.db.DatabaseManager
+import com.parnote.db.model.Token
 import com.parnote.model.*
+import com.parnote.util.TokenUtil
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
@@ -70,14 +72,29 @@ class EmailVerificationAPI : Api() {
                     }
 
                     databaseManager.getDatabase().userDao.makeEmailVerifiedByID(userID, sqlConnection) { result, _ ->
-                        databaseManager.closeConnection(sqlConnection) {
-                            if (result == null) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
+                        if (result == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
 
-                                return@closeConnection
+                            return@makeEmailVerifiedByID
+                        }
+
+                        databaseManager.getDatabase().tokenDao.delete(
+                            Token(
+                                -1,
+                                token,
+                                -1,
+                                TokenUtil.SUBJECT.VERIFY_MAIL.toString()
+                            ), sqlConnection
+                        ) { resultOfDeleteToken, _ ->
+                            databaseManager.closeConnection(sqlConnection) {
+                                if (resultOfDeleteToken == null) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_27))
+
+                                    return@closeConnection
+                                }
+
+                                handler.invoke(Successful())
                             }
-
-                            handler.invoke(Successful())
                         }
                     }
                 }

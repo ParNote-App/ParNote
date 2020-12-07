@@ -63,7 +63,7 @@ class RegisterAPI : Api() {
             termsBox,
             reCaptcha,
             handler,
-            (this::validateFormHandler)(handler, email, username, password, ipAddress)
+            (this::validateFormHandler)(lang, handler, email, username, password, ipAddress)
         )
     }
 
@@ -183,16 +183,27 @@ class RegisterAPI : Api() {
     }
 
     private fun validateFormHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
         username: String,
         password: String,
         ipAddress: String
     ) = { ->
-        databaseManager.createConnection((this::createConnectionHandler)(handler, email, username, password, ipAddress))
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                lang,
+                handler,
+                email,
+                username,
+                password,
+                ipAddress
+            )
+        )
     }
 
     private fun createConnectionHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
         username: String,
@@ -208,11 +219,12 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isEmailExists(
             email,
             sqlConnection,
-            (this::isEmailExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+            (this::isEmailExistsHandler)(lang, handler, email, username, password, ipAddress, sqlConnection)
         )
     }
 
     private fun isEmailExistsHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
         username: String,
@@ -239,11 +251,12 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isUsernameExists(
             username,
             sqlConnection,
-            (this::isUsernameExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+            (this::isUsernameExistsHandler)(lang, handler, email, username, password, ipAddress, sqlConnection)
         )
     }
 
     private fun isUsernameExistsHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
         username: String,
@@ -271,14 +284,15 @@ class RegisterAPI : Api() {
             databaseManager,
             User(-1, username, email, password, ipAddress),
             sqlConnection,
-            (this::registerHandler)(handler, username, sqlConnection)
+            (this::registerHandler)(lang, handler, username, sqlConnection)
         )
     }
 
     private fun registerHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         username: String,
-        sqlConnection: SQLConnection
+        sqlConnection: SQLConnection,
     ) = handler@{ isEnrolled: Result? ->
         if (isEnrolled == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -291,11 +305,12 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
             username,
             sqlConnection,
-            (this::getUserIDFromUsernameOrEmailHandler)(handler, sqlConnection)
+            (this::getUserIDFromUsernameOrEmailHandler)(lang, handler, sqlConnection)
         )
     }
 
     private fun getUserIDFromUsernameOrEmailHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         sqlConnection: SQLConnection
     ) = handler@{ userID: Int?, _: AsyncResult<*> ->
@@ -310,7 +325,7 @@ class RegisterAPI : Api() {
         MailUtil.sendMail(
             userID,
             MailUtil.MailType.ACTIVATION,
-            MailUtil.LangType.EN, // TODO get lang
+            MailUtil.LangType.valueOf(lang.toUpperCase()),
             sqlConnection,
             templateEngine,
             configManager,

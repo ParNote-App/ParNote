@@ -2,11 +2,16 @@ package com.parnote.route.api
 
 import com.parnote.ErrorCode
 import com.parnote.Main.Companion.getComponent
+import com.parnote.config.ConfigManager
 import com.parnote.db.DatabaseManager
 import com.parnote.model.*
 import com.parnote.util.LoginUtil
+import com.parnote.util.MailUtil
 import de.triology.recaptchav2java.ReCaptcha
+import io.vertx.core.AsyncResult
+import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import javax.inject.Inject
 
 
@@ -25,6 +30,15 @@ class LoginAPI : Api() {
     @Inject
     lateinit var reCaptcha: ReCaptcha
 
+    @Inject
+    lateinit var configManager: ConfigManager
+
+    @Inject
+    lateinit var mailClient: MailClient
+
+    @Inject
+    lateinit var templateEngine: HandlebarsTemplateEngine
+
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
@@ -32,6 +46,7 @@ class LoginAPI : Api() {
         val password = data.getString("password")
         val rememberMe = data.getBoolean("rememberMe")
         val reCaptcha = data.getString("recaptcha")
+        val lang = data.getString("lang")
 
         validateForm(usernameOrEmail, password, reCaptcha, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
@@ -86,8 +101,19 @@ class LoginAPI : Api() {
                             }
 
                             if (!isVerified) {
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.LOGIN_EMAIL_NOT_VERIFIED))
+                                MailUtil.sendMail(
+                                    userID,
+                                    MailUtil.MailType.ACTIVATION,
+                                    MailUtil.LangType.valueOf(lang.toUpperCase()),
+                                    sqlConnection,
+                                    templateEngine,
+                                    configManager,
+                                    databaseManager,
+                                    mailClient
+                                ) { _: Result?, _: AsyncResult<*> ->
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        handler.invoke(Error(ErrorCode.LOGIN_EMAIL_NOT_VERIFIED))
+                                    }
                                 }
 
                                 return@isEmailVerifiedByID

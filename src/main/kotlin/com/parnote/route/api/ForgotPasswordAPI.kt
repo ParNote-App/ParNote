@@ -85,7 +85,7 @@ class ForgotPasswordAPI : Api() {
                         MailUtil.sendMail(
                             userID,
                             MailUtil.MailType.RESET_PASSWORD,
-                            MailUtil.LangType.EN_US, // TODO get lang from remote
+                            MailUtil.LangType.EN, // TODO get lang from remote
                             sqlConnection,
                             templateEngine,
                             configManager,

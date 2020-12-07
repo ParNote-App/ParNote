@@ -41,6 +41,7 @@ class ForgotPasswordAPI : Api() {
 
         val usernameOrEmail = data.getString("usernameOrEmail")
         val reCaptcha = data.getString("recaptcha")
+        val lang = data.getString("lang")
 
         validateForm(usernameOrEmail, reCaptcha, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
@@ -85,7 +86,7 @@ class ForgotPasswordAPI : Api() {
                         MailUtil.sendMail(
                             userID,
                             MailUtil.MailType.RESET_PASSWORD,
-                            MailUtil.LangType.EN, // TODO get lang from remote
+                            MailUtil.LangType.valueOf(lang.toUpperCase()),
                             sqlConnection,
                             templateEngine,
                             configManager,

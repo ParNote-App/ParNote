@@ -50,6 +50,7 @@ class RegisterAPI : Api() {
         val password = data.getString("password")
         val termsBox = data.getBoolean("termsBox")
         val reCaptcha = data.getString("recaptcha")
+        val lang = data.getString("lang")
 
         val ipAddress = context.request().remoteAddress().host()
 
@@ -309,7 +310,7 @@ class RegisterAPI : Api() {
         MailUtil.sendMail(
             userID,
             MailUtil.MailType.ACTIVATION,
-            MailUtil.LangType.EN_US,
+            MailUtil.LangType.EN, // TODO get lang
             sqlConnection,
             templateEngine,
             configManager,

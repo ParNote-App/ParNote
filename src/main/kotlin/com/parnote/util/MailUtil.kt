@@ -27,7 +27,7 @@ object MailUtil {
                     "subject" to "E-Mail Aktivasyonu",
                     "template-params" to JsonObject()
                 ),
-                LangType.EN_US to mapOf<String, Any>(
+                LangType.EN to mapOf<String, Any>(
                     "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
                         .put("title", "Verify E-mail Address")
@@ -49,7 +49,7 @@ object MailUtil {
                     "subject" to "Şifre Sıfırla",
                     "template-params" to JsonObject()
                 ),
-                LangType.EN_US to mapOf<String, Any>(
+                LangType.EN to mapOf<String, Any>(
                     "subject" to "Reset Password",
                     "template-params" to JsonObject()
                         .put("title", "Reset Password")
@@ -66,7 +66,7 @@ object MailUtil {
 
     enum class LangType {
         TR,
-        EN_US,
+        EN, // EN (US)
         HU
     }
 

@@ -70,4 +70,6 @@ enum class ErrorCode {
     NEW_PASSWORD_REPEAT_INVALID,
 
     TOKEN_IS_INVALID,
+
+    NOT_LOGGED_IN
 }

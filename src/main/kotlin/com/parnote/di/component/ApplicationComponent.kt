@@ -44,4 +44,6 @@ interface ApplicationComponent {
     fun inject(loginAPI: LoginAPI)
 
     fun inject(resetPasswordPageAPI: ResetPasswordAPI)
+
+    fun inject(checkLoggedInAPI: CheckLoggedInAPI)
 }

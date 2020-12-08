@@ -89,7 +89,7 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedIn: Boolean, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<String?>(SESSION_NAME)
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
 
         if (session != null) {
             handler.invoke(true, null)

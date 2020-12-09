@@ -55,7 +55,7 @@ object MailUtil {
                     "template-params" to JsonObject()
                         .put("page-title", "Reset Password")
                         .put("title", "Reset Password")
-                        .put("description", "If you didn't do this request, please change your password!")
+                        .put("description", "If you didn't do this request, please ignore this e-mail.")
                         .put("button-text", "Reset My Password")
                 ),
                 LangType.HU to mapOf<String, Any>(

@@ -81,4 +81,11 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun isCorrectPasswordByUserID(
+        userID: Int,
+        password: String,
+        sqlConnection: SQLConnection,
+        handler: (isCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

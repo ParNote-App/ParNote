@@ -271,4 +271,21 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun isCorrectPasswordByUserID(
+        userID: Int,
+        password: String,
+        sqlConnection: SQLConnection,
+        handler: (isCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where `id` = ? and `password` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID).add(DigestUtils.md5Hex(password))) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

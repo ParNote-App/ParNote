@@ -54,7 +54,8 @@ class RouterModule(private val mVertx: Vertx) {
             AddNoteAPI(),
             EditNoteAPI(),
             MoveNoteTrashAPI(),
-            MoveNoteArchiveAPI()
+            MoveNoteArchiveAPI(),
+            DeleteNoteAPI()
         )
     }
 

@@ -49,18 +49,59 @@ object TokenUtil {
                 )
                 .compact()
 
-            databaseManager.getDatabase().tokenDao.add(
-                Token(-1, token, userID, subject.toString()),
-                sqlConnection
-            ) { result, asyncResult ->
-                if (result == null) {
-                    handler.invoke(null, asyncResult)
+            if (subject != SUBJECT.LOGIN_SESSION)
+                databaseManager.getDatabase().tokenDao.isAnyTokenExistByUserIDAndSubject(
+                    userID,
+                    subject.toString(),
+                    sqlConnection
+                ) { exists, asyncResultOfIsAnyTokenExistsByUserIDAndSubject ->
+                    if (exists == null) {
+                        handler.invoke(null, asyncResultOfIsAnyTokenExistsByUserIDAndSubject)
 
-                    return@add
+                        return@isAnyTokenExistByUserIDAndSubject
+                    }
+
+                    if (exists)
+                        databaseManager.getDatabase().tokenDao.deleteByUserIDAndSubject(
+                            userID,
+                            subject.toString(),
+                            sqlConnection
+                        ) { resultOfDeleteByUserIDAndSubject, asyncResultOfDeleteByUserIDAndSubject ->
+                            if (resultOfDeleteByUserIDAndSubject == null) {
+                                handler.invoke(null, asyncResultOfDeleteByUserIDAndSubject)
+
+                                return@deleteByUserIDAndSubject
+                            }
+
+                            addToken(databaseManager, token, userID, subject, sqlConnection, handler)
+                        }
+                    else
+                        addToken(databaseManager, token, userID, subject, sqlConnection, handler)
                 }
+            else
+                addToken(databaseManager, token, userID, subject, sqlConnection, handler)
+        }
+    }
 
-                handler.invoke(token, asyncResult)
+    private fun addToken(
+        databaseManager: DatabaseManager,
+        token: String,
+        userID: Int,
+        subject: SUBJECT,
+        sqlConnection: SQLConnection,
+        handler: (token: String?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        databaseManager.getDatabase().tokenDao.add(
+            Token(-1, token, userID, subject.toString()),
+            sqlConnection
+        ) { result, asyncResult ->
+            if (result == null) {
+                handler.invoke(null, asyncResult)
+
+                return@add
             }
+
+            handler.invoke(token, asyncResult)
         }
     }
 }

@@ -75,4 +75,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUser(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

@@ -243,4 +243,32 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getUser(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `name`, `surname`, `username`, `email`, `permission_id`, `email_verified` FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(
+                    User(
+                        userID,
+                        queryResult.result().results[0].getString(0),
+                        queryResult.result().results[0].getString(1),
+                        queryResult.result().results[0].getString(2),
+                        queryResult.result().results[0].getString(3),
+                        "",
+                        "",
+                        queryResult.result().results[0].getInteger(4),
+                        queryResult.result().results[0].getInteger(5) == 1
+                    ), queryResult
+                )
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

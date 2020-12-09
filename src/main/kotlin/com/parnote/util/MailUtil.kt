@@ -39,6 +39,14 @@ object MailUtil {
                     "subject" to "",
                     "template-params" to JsonObject()
                 ),
+                LangType.RU to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
+                ),
+                LangType.DE to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
+                ),
             )
         ),
         RESET_PASSWORD(
@@ -61,6 +69,14 @@ object MailUtil {
                 LangType.HU to mapOf<String, Any>(
                     "subject" to "",
                     "template-params" to JsonObject()
+                ),
+                LangType.RU to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
+                ),
+                LangType.DE to mapOf<String, Any>(
+                    "subject" to "",
+                    "template-params" to JsonObject()
                 )
             )
         )
@@ -69,7 +85,9 @@ object MailUtil {
     enum class LangType {
         TR,
         EN, // EN (US)
-        HU
+        HU,
+        RU,
+        DE
     }
 
     fun sendMail(

@@ -70,7 +70,7 @@ class LoginAPI : Api() {
 
                     if (!exists) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+                            handler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
                         }
 
                         return@isExistsByUsernameOrEmail
@@ -137,7 +137,7 @@ class LoginAPI : Api() {
                                     if (isLoggedIn)
                                         handler.invoke(Successful())
                                     else
-                                        handler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+                                        handler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
                                 }
                             }
                         }
@@ -155,25 +155,25 @@ class LoginAPI : Api() {
         successHandler: () -> Unit
     ) {
         if (usernameOrEmail.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+            errorHandler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
 
             return
         }
 
         if (!usernameOrEmail.matches(Regex("^[a-zA-Z0-9_]+\$")) && !usernameOrEmail.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+            errorHandler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
 
             return
         }
 
         if (password.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+            errorHandler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
 
             return
         }
 
         if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.LOGIN_IS_INVALID))
+            errorHandler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
 
             return
         }

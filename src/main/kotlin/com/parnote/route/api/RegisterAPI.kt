@@ -260,7 +260,7 @@ class RegisterAPI : Api() {
 
         if (emailExists) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.TAKEN_EMAIL_ERROR))
+                handler.invoke(Error(ErrorCode.REGISTER_TAKEN_EMAIL_ERROR))
             }
 
             return@handler
@@ -304,7 +304,7 @@ class RegisterAPI : Api() {
 
         if (usernameExists) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.TAKEN_USERNAME_ERROR))
+                handler.invoke(Error(ErrorCode.REGISTER_TAKEN_USERNAME_ERROR))
             }
 
             return@handler

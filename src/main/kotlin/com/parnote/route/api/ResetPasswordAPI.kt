@@ -53,7 +53,7 @@ class ResetPasswordAPI : Api() {
 
                     if (!exists) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_INVALID_TOKEN))
                         }
 
                         return@isTokenExists
@@ -88,7 +88,7 @@ class ResetPasswordAPI : Api() {
                                         return@closeConnection
                                     }
 
-                                    handler.invoke(Error(ErrorCode.TOKEN_IS_INVALID))
+                                    handler.invoke(Error(ErrorCode.RESET_PASSWORD_INVALID_TOKEN))
                                 }
                             }
 
@@ -130,7 +130,7 @@ class ResetPasswordAPI : Api() {
                                 ) { resultOfDeleteToken, _ ->
                                     databaseManager.closeConnection(sqlConnection) {
                                         if (resultOfDeleteToken == null) {
-                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
+                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_65))
 
                                             return@closeConnection
                                         }
@@ -161,31 +161,31 @@ class ResetPasswordAPI : Api() {
         }
 
         if (newPassword.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_EMPTY))
 
             return
         }
 
         if (newPasswordRepeat.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_REPEAT_EMPTY))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_REPEAT_EMPTY))
 
             return
         }
 
         if (newPassword != newPasswordRepeat) {
-            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_DOESNT_MATCH))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_DOESNT_MATCH))
 
             return
         }
 
         if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_INVALID))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_INVALID))
 
             return
         }
 
         if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
-            errorHandler.invoke(Error(ErrorCode.NEW_PASSWORD_REPEAT_INVALID))
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_REPEAT_INVALID))
 
             return
         }

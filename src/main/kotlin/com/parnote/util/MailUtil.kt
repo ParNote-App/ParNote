@@ -30,6 +30,7 @@ object MailUtil {
                 LangType.EN to mapOf<String, Any>(
                     "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
                         .put("title", "Verify E-mail Address")
                         .put("description", "To login your account, you need to verify this e-mail address.")
                         .put("button-text", "Verify My E-Mail Address")
@@ -52,6 +53,7 @@ object MailUtil {
                 LangType.EN to mapOf<String, Any>(
                     "subject" to "Reset Password",
                     "template-params" to JsonObject()
+                        .put("page-title", "Reset Password")
                         .put("title", "Reset Password")
                         .put("description", "If you didn't do this request, please change your password!")
                         .put("button-text", "Reset My Password")

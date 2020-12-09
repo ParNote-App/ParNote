@@ -52,7 +52,8 @@ class RouterModule(private val mVertx: Vertx) {
             InitialLoggedInAPI(),
             GetUserNotesAPI(),
             AddNoteAPI(),
-            EditNoteAPI()
+            EditNoteAPI(),
+            MoveNoteTrashAPI()
         )
     }
 

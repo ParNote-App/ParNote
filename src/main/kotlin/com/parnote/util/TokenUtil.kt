@@ -3,10 +3,13 @@ package com.parnote.util
 import com.parnote.db.DatabaseManager
 import com.parnote.db.model.Token
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 import java.util.*
+
 
 object TokenUtil {
     enum class SUBJECT {
@@ -32,8 +35,11 @@ object TokenUtil {
                 return@getSecretKeyByID
             }
 
+            val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+
             val token = Jwts.builder()
                 .setSubject(subject.toString())
+                .setHeaderParam("key", Encoders.BASE64.encode(key.encoded))
                 .signWith(
                     Keys.hmacShaKeyFor(
                         Base64.getDecoder().decode(

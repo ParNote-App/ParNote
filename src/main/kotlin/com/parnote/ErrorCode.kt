@@ -30,6 +30,8 @@ enum class ErrorCode {
     UNKNOWN_ERROR_27,
     UNKNOWN_ERROR_28,
     UNKNOWN_ERROR_29,
+    UNKNOWN_ERROR_30,
+    UNKNOWN_ERROR_31,
 
     REGISTER_NAME_EMPTY,
     REGISTER_NAME_SHORT,
@@ -71,5 +73,5 @@ enum class ErrorCode {
 
     TOKEN_IS_INVALID,
 
-    NOT_LOGGED_IN
+    NOT_LOGGED_IN,
 }

@@ -49,7 +49,8 @@ class RouterModule(private val mVertx: Vertx) {
             ResetPasswordTokenAPI(),
             ResetPasswordAPI(),
             EmailVerificationAPI(),
-            CheckLoggedInAPI()
+            CheckLoggedInAPI(),
+            InitialLoggedInAPI()
         )
     }
 

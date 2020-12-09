@@ -98,6 +98,23 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         }
     }
 
+    override fun isAnyTokenExistByUserIDAndSubject(
+        userID: Int,
+        subject: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `user_id` = ? AND `subject` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID).add(subject)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) != 0, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
     override fun getCreatedTimeByToken(
         token: String,
         sqlConnection: SQLConnection,

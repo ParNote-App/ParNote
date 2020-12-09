@@ -28,6 +28,13 @@ interface TokenDao : Dao<Token> {
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun isAnyTokenExistByUserIDAndSubject(
+        userID: Int,
+        subject: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getCreatedTimeByToken(
         token: String,
         sqlConnection: SQLConnection,

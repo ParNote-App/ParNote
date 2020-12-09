@@ -88,4 +88,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (isCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

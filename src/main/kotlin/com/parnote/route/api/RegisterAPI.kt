@@ -179,7 +179,7 @@ class RegisterAPI : Api() {
             return
         }
 
-//        successHandler.invoke()
+        successHandler.invoke()
     }
 
     private fun validateFormHandler(

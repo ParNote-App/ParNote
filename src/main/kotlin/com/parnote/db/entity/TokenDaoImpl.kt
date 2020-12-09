@@ -147,4 +147,20 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `user_id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

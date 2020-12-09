@@ -47,4 +47,10 @@ interface TokenDao : Dao<Token> {
         sqlConnection: SQLConnection,
         handler: (createdTime: Long?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

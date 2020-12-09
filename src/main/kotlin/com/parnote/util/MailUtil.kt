@@ -26,6 +26,10 @@ object MailUtil {
                 LangType.TR to mapOf<String, Any>(
                     "subject" to "E-Mail Aktivasyonu",
                     "template-params" to JsonObject()
+                        .put("page-title", "Hesap Aktivasyonu")
+                        .put("title", "E-Posta Adresini Doğrula")
+                        .put("description", "Hesabınızda oturum açmak için bu e-posta adresini doğrulamanız gerekir.")
+                        .put("button-text", "E-posta Adresimi Doğrula")
                 ),
                 LangType.EN to mapOf<String, Any>(
                     "subject" to "E-Mail Verification",
@@ -57,6 +61,10 @@ object MailUtil {
                 LangType.TR to mapOf<String, Any>(
                     "subject" to "Şifre Sıfırla",
                     "template-params" to JsonObject()
+                        .put("page-title", "Şifre Sıfırlama")
+                        .put("title", "Şifre Sıfırlama")
+                        .put("description", "Bu isteği siz yapmadıysanız, lütfen bu e-postayı dikkate almayın.")
+                        .put("button-text", "Şifremi Sıfırla")
                 ),
                 LangType.EN to mapOf<String, Any>(
                     "subject" to "Reset Password",

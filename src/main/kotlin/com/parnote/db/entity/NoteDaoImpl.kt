@@ -114,4 +114,28 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun moveStatus(
+        id: Int,
+        userID: Int,
+        status: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${getTablePrefix() + tableName}` SET `status` = ? WHERE `id` = ? AND `user_id` = ?"
+
+        sqlConnection.updateWithParams(
+            query,
+            JsonArray()
+                .add(status)
+                .add(id)
+                .add(userID)
+        ) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

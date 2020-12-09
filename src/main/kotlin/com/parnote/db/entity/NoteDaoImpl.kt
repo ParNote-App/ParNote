@@ -89,4 +89,28 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                 handler.invoke(null, it)
         }
     }
+
+    override fun edit(
+        note: Note,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${getTablePrefix() + tableName}` SET `title` = ?, `text` = ?, `last_modified` = ?, `status` = ? WHERE `id` = ?"
+
+        sqlConnection.updateWithParams(
+            query,
+            JsonArray()
+                .add(Base64.getEncoder().encodeToString(note.title.toByteArray()))
+                .add(Base64.getEncoder().encodeToString(note.text.toByteArray()))
+                .add(System.currentTimeMillis())
+                .add(1)
+                .add(note.id)
+        ) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

@@ -19,4 +19,10 @@ interface NoteDao : Dao<Note> {
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun edit(
+        note: Note,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

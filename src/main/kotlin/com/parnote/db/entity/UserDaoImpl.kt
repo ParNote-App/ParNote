@@ -21,6 +21,8 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
+              `name` varchar(255) NOT NULL,
+              `surname` varchar(255) NOT NULL,
               `username` varchar(16) NOT NULL UNIQUE,
               `email` varchar(255) NOT NULL UNIQUE,
               `password` varchar(255) NOT NULL,
@@ -113,14 +115,16 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?); "
+            "INSERT INTO `${getTablePrefix() + tableName}` (name, surname, username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?); "
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
         sqlConnection.queryWithParams(
             query,
             JsonArray()
+                .add(user.name)
+                .add(user.surname)
                 .add(user.username)
                 .add(user.email)
                 .add(DigestUtils.md5Hex(user.password))

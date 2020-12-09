@@ -63,7 +63,7 @@ class RegisterAPI : Api() {
             termsBox,
             reCaptcha,
             handler,
-            (this::validateFormHandler)(lang, handler, email, username, password, ipAddress)
+            (this::validateFormHandler)(lang, handler, email, name, surname, username, password, ipAddress)
         )
     }
 
@@ -186,6 +186,8 @@ class RegisterAPI : Api() {
         lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String
@@ -195,6 +197,8 @@ class RegisterAPI : Api() {
                 lang,
                 handler,
                 email,
+                name,
+                surname,
                 username,
                 password,
                 ipAddress
@@ -206,6 +210,8 @@ class RegisterAPI : Api() {
         lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String
@@ -219,7 +225,17 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isEmailExists(
             email,
             sqlConnection,
-            (this::isEmailExistsHandler)(lang, handler, email, username, password, ipAddress, sqlConnection)
+            (this::isEmailExistsHandler)(
+                lang,
+                handler,
+                email,
+                name,
+                surname,
+                username,
+                password,
+                ipAddress,
+                sqlConnection
+            )
         )
     }
 
@@ -227,6 +243,8 @@ class RegisterAPI : Api() {
         lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String,
@@ -251,7 +269,17 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isUsernameExists(
             username,
             sqlConnection,
-            (this::isUsernameExistsHandler)(lang, handler, email, username, password, ipAddress, sqlConnection)
+            (this::isUsernameExistsHandler)(
+                lang,
+                handler,
+                email,
+                name,
+                surname,
+                username,
+                password,
+                ipAddress,
+                sqlConnection
+            )
         )
     }
 
@@ -259,6 +287,8 @@ class RegisterAPI : Api() {
         lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String,
@@ -282,7 +312,7 @@ class RegisterAPI : Api() {
 
         RegisterUtil.register(
             databaseManager,
-            User(-1, username, email, password, ipAddress),
+            User(-1, name, surname, username, email, password, ipAddress),
             sqlConnection,
             (this::registerHandler)(lang, handler, username, sqlConnection)
         )

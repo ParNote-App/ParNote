@@ -4,6 +4,7 @@ import com.parnote.config.ConfigManager
 import com.parnote.db.migration.DatabaseMigration_1_2
 import com.parnote.db.migration.DatabaseMigration_2_3
 import com.parnote.db.migration.DatabaseMigration_3_4
+import com.parnote.db.migration.DatabaseMigration_4_5
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
@@ -24,16 +25,17 @@ class DatabaseManager(
     }
 
     private val mMigrations by lazy {
-        listOf<DatabaseMigration>(
+        listOf(
             DatabaseMigration_1_2(),
             DatabaseMigration_2_3(),
-            DatabaseMigration_3_4()
+            DatabaseMigration_3_4(),
+            DatabaseMigration_4_5()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 4
-        const val DATABASE_SCHEME_VERSION_INFO = "Add permission table"
+        const val DATABASE_SCHEME_VERSION = 5
+        const val DATABASE_SCHEME_VERSION_INFO = "Add note table"
     }
 
     init {

@@ -35,6 +35,13 @@ interface TokenDao : Dao<Token> {
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun deleteByUserIDAndSubject(
+        userID: Int,
+        subject: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getCreatedTimeByToken(
         token: String,
         sqlConnection: SQLConnection,

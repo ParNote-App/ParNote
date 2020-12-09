@@ -107,13 +107,13 @@ class RegisterAPI : Api() {
             return
         }
 
-        if (!name.matches(Regex("^[A-Za-z ]*$"))) {
+        if (!name.matches(Regex("^[\\p{L} ]+$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_INVALID))
 
             return
         }
 
-        if (!surname.matches(Regex("^[A-Za-z]*$"))) {
+        if (!surname.matches(Regex("^[\\p{L}]+\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_INVALID))
 
             return
@@ -179,7 +179,7 @@ class RegisterAPI : Api() {
             return
         }
 
-        successHandler.invoke()
+//        successHandler.invoke()
     }
 
     private fun validateFormHandler(

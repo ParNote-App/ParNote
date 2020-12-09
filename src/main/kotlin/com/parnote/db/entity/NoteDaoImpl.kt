@@ -138,4 +138,21 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun delete(
+        id: Int,
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `id` = ? AND `user_id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(id).add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

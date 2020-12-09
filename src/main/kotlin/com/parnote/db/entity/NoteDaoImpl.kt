@@ -96,7 +96,7 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${getTablePrefix() + tableName}` SET `title` = ?, `text` = ?, `last_modified` = ?, `status` = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET `title` = ?, `text` = ?, `last_modified` = ?, `status` = ? WHERE `id` = ? AND `user_id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -106,6 +106,7 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                 .add(System.currentTimeMillis())
                 .add(1)
                 .add(note.id)
+                .add(note.userID)
         ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(Successful(), queryResult)

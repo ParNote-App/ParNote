@@ -3,6 +3,7 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.db.model.Note
 import com.parnote.model.*
+import com.parnote.util.LoginUtil
 import io.vertx.ext.web.RoutingContext
 
 class EditNoteAPI : LoggedInApi() {
@@ -24,23 +25,33 @@ class EditNoteAPI : LoggedInApi() {
                 return@createConnection
             }
 
-            databaseManager.getDatabase().noteDao.edit(
-                Note(id, -1, title, note, "", 1, false),
-                sqlConnection
-            ) { result, _ ->
-                databaseManager.closeConnection(sqlConnection) {
-                    if (result == null) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_40))
-
-                        return@closeConnection
+            LoginUtil.getUserIDFromSessionOrCookie(context, sqlConnection, databaseManager) { userID, _ ->
+                if (userID == null) {
+                    databaseManager.closeConnection(sqlConnection) {
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_42))
                     }
 
-                    handler.invoke(
-                        if (result is Successful)
-                            Successful()
-                        else
-                            Error(ErrorCode.UNKNOWN_ERROR_41)
-                    )
+                    return@getUserIDFromSessionOrCookie
+                }
+
+                databaseManager.getDatabase().noteDao.edit(
+                    Note(id, userID, title, note, "", 1, false),
+                    sqlConnection
+                ) { result, _ ->
+                    databaseManager.closeConnection(sqlConnection) {
+                        if (result == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_40))
+
+                            return@closeConnection
+                        }
+
+                        handler.invoke(
+                            if (result is Successful)
+                                Successful()
+                            else
+                                Error(ErrorCode.UNKNOWN_ERROR_41)
+                        )
+                    }
                 }
             }
         }

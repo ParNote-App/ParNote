@@ -41,27 +41,27 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                 mapOf(
                     "config-version" to CONFIG_VERSION,
 
-                    "recaptcha-secret" to System.getProperty("recaptchaSecret", ""),
+                    "recaptcha-secret" to System.getProperty("recaptcha.secret", ""),
 
                     "database" to mapOf(
-                        "host" to if (System.getenv("dbHost") == null) System.getenv("dbHost") else "",
-                        "name" to if (System.getenv("dbName") == null) System.getenv("dbName") else "",
-                        "username" to if (System.getenv("dbUsername") == null) System.getenv("dbUsername") else "",
-                        "password" to if (System.getenv("dbPassword") == null) System.getenv("dbPassword") else "",
-                        "prefix" to if (System.getenv("dbPrefix") == null) System.getenv("dbPrefix") else "parnote_"
+                        "host" to System.getProperty("db.host", ""),
+                        "name" to System.getProperty("db.name", ""),
+                        "username" to System.getProperty("db.username", ""),
+                        "password" to System.getProperty("db.password", ""),
+                        "prefix" to System.getProperty("db.prefix", "parnote_")
                     ),
 
                     "email" to mapOf(
-                        "address" to if (System.getenv("emailAddress") == null) System.getenv("emailAddress") else "",
-                        "host" to if (System.getenv("emailHost") == null) System.getenv("emailHost") else "",
-                        "port" to if (System.getenv("emailPort") == null) System.getenv("emailPort") else 465,
-                        "username" to if (System.getenv("emailUsername") == null) System.getenv("emailUsername") else "",
-                        "password" to if (System.getenv("emailPassword") == null) System.getenv("emailPassword") else "",
-                        "SSL" to ((if (System.getenv("emailSSL") == null) System.getenv("emailSSL") else "1") == "1")
+                        "address" to System.getProperty("email.address", ""),
+                        "host" to System.getProperty("email.host", ""),
+                        "port" to Integer.getInteger("email.port", 465),
+                        "username" to System.getProperty("email.username", ""),
+                        "password" to System.getProperty("email.password", ""),
+                        "SSL" to (System.getProperty("email.ssl", "1") == "1")
                     ),
 
                     "resourcesDir" to "src/main/resources/",
-                    "ui-address" to if (System.getenv("uiAddress") == null) System.getenv("uiAddress") else "http://localhost:5000"
+                    "ui-address" to System.getProperty("ui.address", "http://localhost:5000")
                 )
             )
         }

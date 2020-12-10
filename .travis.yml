@@ -4,7 +4,21 @@ script:
   - if [ "$TRAVIS_BRANCH" = "dev" ]; then ./gradlew buildDev; fi
   - if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew Build; fi
 install:
-  - if [ "$TRAVIS_BRANCH" = "master" ]; then chmod +x travis-scripts/install_script.sh && ./travis-scripts/install_script.sh; fi
+  - nvm use 11.0.0
+  - npm --version
+  - node --version
+  - ./gradlew build
+  - git clone https://github.com/ParNote-App/ParNote-UI.git parnote-ui
+  - cd parnote-ui
+  - npm install
+  - npm run build
+  - ls -a
+  - ls ..
+  - cp -avr public ../public
+  - cd ..
+  - rm -rf parnote-ui
+  - ls -a
+  - ls -a public
 before_deploy:
   - git config --local user.name $GITHUB_USERNAME
   - git config --local user.email $GITHUB_EMAIL

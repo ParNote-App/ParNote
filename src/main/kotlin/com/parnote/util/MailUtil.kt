@@ -44,8 +44,12 @@ object MailUtil {
                     "template-params" to JsonObject()
                 ),
                 LangType.RU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "Подтверждение E-Mail",
                     "template-params" to JsonObject()
+                        .put("page-title", "Подтверждение Аккаунта")
+                        .put("title", "Подтвердите E-Mail")
+                        .put("description", "Для входа в аккаунт необходимо подтведить e-mail.")
+                        .put("button-text", "Подтвердить мой аккаунт")
                 ),
                 LangType.DE to mapOf<String, Any>(
                     "subject" to "",
@@ -79,8 +83,12 @@ object MailUtil {
                     "template-params" to JsonObject()
                 ),
                 LangType.RU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "Сбросить Пароль",
                     "template-params" to JsonObject()
+                        .put("page-title", "Сбросить Пароль")
+                        .put("title", "Сбросить Пароль")
+                        .put("description", "Если вы не подавали запрос, то пожалуйста проигнорируйте это сообщение.")
+                        .put("button-text", "Сбросить Пароль")
                 ),
                 LangType.DE to mapOf<String, Any>(
                     "subject" to "",

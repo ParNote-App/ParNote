@@ -2,7 +2,6 @@ language: generic
 
 script:
   - if [ "$TRAVIS_BRANCH" = "dev" ]; then ./gradlew buildDev; fi
-  - if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew Build; fi
 install:
   - nvm use 11.0.0
   - npm --version

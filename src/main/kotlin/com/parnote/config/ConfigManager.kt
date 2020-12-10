@@ -44,24 +44,24 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                     "recaptcha-secret" to System.getProperty("recaptchaSecret", ""),
 
                     "database" to mapOf(
-                        "host" to System.getProperty("dbHost", ""),
-                        "name" to System.getProperty("dbName", ""),
-                        "username" to System.getProperty("dbUsername", ""),
-                        "password" to System.getProperty("dbPassword", ""),
-                        "prefix" to System.getProperty("dbPrefix", "parnote_")
+                        "host" to if (System.getenv("dbHost") == null) System.getenv("dbHost") else "",
+                        "name" to if (System.getenv("dbName") == null) System.getenv("dbName") else "",
+                        "username" to if (System.getenv("dbUsername") == null) System.getenv("dbUsername") else "",
+                        "password" to if (System.getenv("dbPassword") == null) System.getenv("dbPassword") else "",
+                        "prefix" to if (System.getenv("dbPrefix") == null) System.getenv("dbPrefix") else "parnote_"
                     ),
 
                     "email" to mapOf(
-                        "address" to System.getProperty("emailAddress", ""),
-                        "host" to System.getProperty("emailHost", ""),
-                        "port" to Integer.getInteger("emailPort", 465),
-                        "username" to System.getProperty("emailUsername", ""),
-                        "password" to System.getProperty("emailPassword", ""),
-                        "SSL" to (System.getProperty("emailSSL", "1") == "1")
+                        "address" to if (System.getenv("emailAddress") == null) System.getenv("emailAddress") else "",
+                        "host" to if (System.getenv("emailHost") == null) System.getenv("emailHost") else "",
+                        "port" to if (System.getenv("emailPort") == null) System.getenv("emailPort") else 465,
+                        "username" to if (System.getenv("emailUsername") == null) System.getenv("emailUsername") else "",
+                        "password" to if (System.getenv("emailPassword") == null) System.getenv("emailPassword") else "",
+                        "SSL" to ((if (System.getenv("emailSSL") == null) System.getenv("emailSSL") else "1") == "1")
                     ),
 
                     "resourcesDir" to "src/main/resources/",
-                    "ui-address" to System.getProperty("uiAddress", "http://localhost:5000")
+                    "ui-address" to if (System.getenv("uiAddress") == null) System.getenv("uiAddress") else "http://localhost:5000"
                 )
             )
         }

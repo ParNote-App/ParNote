@@ -92,7 +92,7 @@ class Main : AbstractVerticle() {
     }
 
     private fun startWebServer() {
-        logger.info("Gelen değer: " + System.getProperty("test", "gelmedi"))
+        logger.info("Gelen değer: " + System.getenv("test"))
 
         vertx
             .createHttpServer()

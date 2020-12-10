@@ -4,7 +4,7 @@ script:
   - if [ "$TRAVIS_BRANCH" = "dev" ]; then ./gradlew buildDev; fi
   - if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew Build; fi
 install:
-  - if [ "$TRAVIS_BRANCH" = "master" ]; then ./travis-scripts/install_script.sh; fi
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then chmod +x travis-scripts/install_script.sh && ./travis-scripts/install_script.sh; fi
 before_deploy:
   - git config --local user.name $GITHUB_USERNAME
   - git config --local user.email $GITHUB_EMAIL

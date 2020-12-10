@@ -92,15 +92,16 @@ class Main : AbstractVerticle() {
     }
 
     private fun startWebServer() {
-        logger.info("Gelen değer: " + System.getenv("test"))
 
         vertx
             .createHttpServer()
             .requestHandler(router)
             .listen(Integer.getInteger("http.port", PORT), System.getProperty("http.address", "0.0.0.0")) { result ->
-                if (result.succeeded())
+                if (result.succeeded()) {
+                    logger.info("Gelen değer: " + System.getenv("test"))
+
                     logger.info("Started listening port $PORT")
-                else
+                } else
                     logger.error("Failed to listen port $PORT")
             }
     }

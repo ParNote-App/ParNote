@@ -87,12 +87,12 @@ object MailUtil {
                         .put("button-text", "Reset My Password")
                 ),
                 LangType.HU to mapOf<String, Any>(
-                    "subject" to "Reset Password",
+                    "subject" to "Jelszó visszaállítása",
                     "template-params" to JsonObject()
-                        .put("page-title", "Reset Password")
-                        .put("title", "Reset Password")
-                        .put("description", "If you didn't do this request, please ignore this e-mail.")
-                        .put("button-text", "Reset My Password")
+                        .put("page-title", "Jelszó visszaállítása")
+                        .put("title", "Jelszó visszaállítása")
+                        .put("description", "Ha nem tette meg ezt a kérést, hagyja figyelmen kívül ezt az e-mailt.")
+                        .put("button-text", "Jelszavam visszaállítása")
                 ),
                 LangType.RU to mapOf<String, Any>(
                     "subject" to "Сбросить Пароль",
@@ -103,12 +103,12 @@ object MailUtil {
                         .put("button-text", "Сбросить Пароль")
                 ),
                 LangType.DE to mapOf<String, Any>(
-                    "subject" to "Reset Password",
+                    "subject" to "Passwort zurücksetzen",
                     "template-params" to JsonObject()
-                        .put("page-title", "Reset Password")
-                        .put("title", "Reset Password")
-                        .put("description", "If you didn't do this request, please ignore this e-mail.")
-                        .put("button-text", "Reset My Password")
+                        .put("page-title", "Passwort zurücksetzen")
+                        .put("title", "Passwort zurücksetzen")
+                        .put("description", "Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.")
+                        .put("button-text", "Setze mein Passwort zurück")
                 )
             )
         )

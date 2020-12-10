@@ -92,6 +92,8 @@ class Main : AbstractVerticle() {
     }
 
     private fun startWebServer() {
+        logger.info("Gelen değer: " + System.getProperty("test", "gelmedi"))
+
         vertx
             .createHttpServer()
             .requestHandler(router)

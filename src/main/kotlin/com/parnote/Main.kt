@@ -98,7 +98,8 @@ class Main : AbstractVerticle() {
             .requestHandler(router)
             .listen(Integer.getInteger("http.port", PORT), System.getProperty("http.address", "0.0.0.0")) { result ->
                 if (result.succeeded()) {
-                    logger.info("Gelen değer: " + System.getenv("test"))
+                    logger.info("Gelen değer: " + if (System.getenv("TEST") == null) "gelmedi" else System.getenv("TEST"))
+                    logger.info("Gelen değer2: " + System.getProperty("TEST", "gelmedi"))
 
                     logger.info("Started listening port $PORT")
                 } else

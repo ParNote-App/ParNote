@@ -40,8 +40,12 @@ object MailUtil {
                         .put("button-text", "Verify My E-Mail Address")
                 ),
                 LangType.HU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
+                        .put("title", "Verify E-mail Address")
+                        .put("description", "To login your account, you need to verify this e-mail address.")
+                        .put("button-text", "Verify My E-Mail Address")
                 ),
                 LangType.RU to mapOf<String, Any>(
                     "subject" to "Подтверждение E-Mail",
@@ -52,8 +56,12 @@ object MailUtil {
                         .put("button-text", "Подтвердить мой аккаунт")
                 ),
                 LangType.DE to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
+                        .put("title", "Verify E-mail Address")
+                        .put("description", "To login your account, you need to verify this e-mail address.")
+                        .put("button-text", "Verify My E-Mail Address")
                 ),
             )
         ),
@@ -79,8 +87,12 @@ object MailUtil {
                         .put("button-text", "Reset My Password")
                 ),
                 LangType.HU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "Reset Password",
                     "template-params" to JsonObject()
+                        .put("page-title", "Reset Password")
+                        .put("title", "Reset Password")
+                        .put("description", "If you didn't do this request, please ignore this e-mail.")
+                        .put("button-text", "Reset My Password")
                 ),
                 LangType.RU to mapOf<String, Any>(
                     "subject" to "Сбросить Пароль",
@@ -91,8 +103,12 @@ object MailUtil {
                         .put("button-text", "Сбросить Пароль")
                 ),
                 LangType.DE to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "Reset Password",
                     "template-params" to JsonObject()
+                        .put("page-title", "Reset Password")
+                        .put("title", "Reset Password")
+                        .put("description", "If you didn't do this request, please ignore this e-mail.")
+                        .put("button-text", "Reset My Password")
                 )
             )
         )

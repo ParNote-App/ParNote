@@ -1,6 +1,6 @@
 <p align="center"><img width="100" src="https://i.ibb.co/xgjv4yq/parnote-favicon.png" alt="Pano logo"></p>
 <p align="center">
-  A note application which allows you to add, edit and share personal notes, collaborate with your friends and moreover discover other people notes.
+  A note application that allows you to add, edit and share personal notes, collaborate with your friends, and moreover discover other people's notes. 
 </p>
 <p align="center">
   <img src="https://img.shields.io/maintenance/yes/2021?style=for-the-badge" alt="Maintained">

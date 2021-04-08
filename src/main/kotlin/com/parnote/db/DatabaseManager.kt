@@ -27,13 +27,14 @@ class DatabaseManager(
             DatabaseMigration_2_3(),
             DatabaseMigration_3_4(),
             DatabaseMigration_4_5(),
-            DatabaseMigration_5_6()
+            DatabaseMigration_5_6(),
+            DatabaseMigration_6_7()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 6
-        const val DATABASE_SCHEME_VERSION_INFO = "Add name and surname fields to user table"
+        const val DATABASE_SCHEME_VERSION = 7
+        const val DATABASE_SCHEME_VERSION_INFO = "Drop all tables and recreate everything."
     }
 
     init {
@@ -41,7 +42,7 @@ class DatabaseManager(
     }
 
     private fun checkMigration() {
-        createConnection { sqlConnection, asyncResult ->
+        createConnection { sqlConnection, _ ->
             if (sqlConnection != null) {
                 mDatabase.schemeVersionDao.getLastSchemeVersion(sqlConnection) { schemeVersion, _ ->
                     if (schemeVersion == null)

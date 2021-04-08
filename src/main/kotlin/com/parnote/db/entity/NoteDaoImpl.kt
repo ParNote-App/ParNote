@@ -8,7 +8,6 @@ import com.parnote.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
-import java.util.*
 
 class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao {
 
@@ -25,7 +24,7 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
               `status` int(1) NOT NULL DEFAULT 0,
               `favorite` int(1) NOT NULL DEFAULT 0,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Note Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Note Table';
         """
             ) {
                 handler.invoke(it)
@@ -48,12 +47,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                     notes.add(
                         mapOf(
                             "id" to noteInDB.getInteger(0),
-                            "title" to String(
-                                Base64.getDecoder().decode(noteInDB.getString(1).toByteArray())
-                            ),
-                            "text" to String(
-                                Base64.getDecoder().decode(noteInDB.getString(2).toByteArray())
-                            ),
+                            "title" to noteInDB.getString(1),
+                            "text" to noteInDB.getString(2),
                             "last_modified" to noteInDB.getString(3),
                             "status" to noteInDB.getInteger(4),
                             "favorite" to noteInDB.getInteger(5)
@@ -78,8 +73,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
             """.trimIndent(),
             JsonArray()
                 .add(note.userID)
-                .add(Base64.getEncoder().encodeToString(note.title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(note.text.toByteArray()))
+                .add(note.title.toByteArray())
+                .add(note.text.toByteArray())
                 .add(System.currentTimeMillis())
                 .add(1)
         ) {
@@ -101,8 +96,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
         sqlConnection.updateWithParams(
             query,
             JsonArray()
-                .add(Base64.getEncoder().encodeToString(note.title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(note.text.toByteArray()))
+                .add(note.title.toByteArray())
+                .add(note.text.toByteArray())
                 .add(System.currentTimeMillis())
                 .add(1)
                 .add(note.id)

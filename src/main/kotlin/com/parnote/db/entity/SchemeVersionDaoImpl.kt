@@ -1,8 +1,6 @@
 package com.parnote.db.entity
 
 import com.parnote.db.DaoImpl
-import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
-import com.parnote.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import com.parnote.db.dao.SchemeVersionDao
 import com.parnote.db.model.SchemeVersion
 import com.parnote.model.Result
@@ -22,37 +20,12 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
               `key` varchar(255) not null,
               `extra` varchar(255),
               PRIMARY KEY (`key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Database scheme version table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database scheme version table.';
         """
             ) {
-            if (it.succeeded())
-                getLastSchemeVersion(sqlConnection) { schemeVersion, asyncResult ->
-                    if (schemeVersion == null)
-                        add(
-                            sqlConnection,
-                            SchemeVersion(DATABASE_SCHEME_VERSION.toString(), DATABASE_SCHEME_VERSION_INFO)
-                        ) { _, asyncResultAdd ->
-                            handler.invoke(asyncResultAdd)
-                        }
-                    else {
-                        val databaseVersion = schemeVersion.key.toIntOrNull() ?: 0
-
-                        if (databaseVersion == 0)
-                            add(
-                                sqlConnection,
-                                SchemeVersion(DATABASE_SCHEME_VERSION.toString(), DATABASE_SCHEME_VERSION_INFO)
-                            ) { _, asyncResultAdd ->
-                                handler.invoke(asyncResultAdd)
-                            }
-                        else
-                            handler.invoke(asyncResult)
-                    }
-
-                }
-            else
                 handler.invoke(it)
+            }
         }
-    }
 
     override fun add(
         sqlConnection: SQLConnection,

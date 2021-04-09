@@ -32,6 +32,8 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
               `public_key` text NOT NULL,
               `register_date` MEDIUMTEXT NOT NULL,
               `email_verified` int(1) NOT NULL DEFAULT 0,
+                constraint ${getTablePrefix()}user_${getTablePrefix()}permission_id_fk
+                    foreign key (permission_id) references ${getTablePrefix()}permission (id),
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='User Table';
         """

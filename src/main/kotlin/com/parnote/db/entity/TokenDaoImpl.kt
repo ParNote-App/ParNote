@@ -20,6 +20,8 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
               `created_time` MEDIUMTEXT NOT NULL,
               `user_id` int(11) NOT NULL,
               `subject` varchar(255) NOT NULL,
+                constraint ${getTablePrefix()}token_${getTablePrefix()}user_id_fk
+                    foreign key (user_id) references ${getTablePrefix()}user (id),
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Token Table';
         """

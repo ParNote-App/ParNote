@@ -23,6 +23,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
               `last_modified` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL DEFAULT 0,
               `favorite` int(1) NOT NULL DEFAULT 0,
+                constraint ${getTablePrefix()}note_${getTablePrefix()}user_id_fk
+                    foreign key (user_id) references ${getTablePrefix()}user (id),
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Note Table';
         """

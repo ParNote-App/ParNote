@@ -5,17 +5,17 @@ import com.parnote.db.entity.*
 
 data class Database(
     val schemeVersionDao: SchemeVersionDao = SchemeVersionDaoImpl(),
+    val permissionDao: PermissionDao = PermissionDaoImpl(),
     val userDao: UserDao = UserDaoImpl(),
     val tokenDao: TokenDao = TokenDaoImpl(),
-    val permissionDao: PermissionDao = PermissionDaoImpl(),
     val noteDao: NoteDao = NoteDaoImpl(),
     val shareLinkDao: ShareLinkDao = ShareLinkDaoImpl()
 ) {
     fun init() = listOf(
         schemeVersionDao.init(),
+        permissionDao.init(),
         userDao.init(),
         tokenDao.init(),
-        permissionDao.init(),
         noteDao.init(),
         shareLinkDao.init()
     )

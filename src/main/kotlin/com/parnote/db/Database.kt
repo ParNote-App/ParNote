@@ -8,13 +8,15 @@ data class Database(
     val userDao: UserDao = UserDaoImpl(),
     val tokenDao: TokenDao = TokenDaoImpl(),
     val permissionDao: PermissionDao = PermissionDaoImpl(),
-    val noteDao: NoteDao = NoteDaoImpl()
+    val noteDao: NoteDao = NoteDaoImpl(),
+    val shareLinkDao: ShareLinkDao = ShareLinkDaoImpl()
 ) {
     fun init() = listOf(
         schemeVersionDao.init(),
         userDao.init(),
         tokenDao.init(),
         permissionDao.init(),
-        noteDao.init()
+        noteDao.init(),
+        shareLinkDao.init()
     )
 }

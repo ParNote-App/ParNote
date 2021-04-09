@@ -28,13 +28,14 @@ class DatabaseManager(
             DatabaseMigration_3_4(),
             DatabaseMigration_4_5(),
             DatabaseMigration_5_6(),
-            DatabaseMigration_6_7()
+            DatabaseMigration_6_7(),
+            DatabaseMigration_7_8()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 7
-        const val DATABASE_SCHEME_VERSION_INFO = "Drop all tables and recreate everything."
+        const val DATABASE_SCHEME_VERSION = 8
+        const val DATABASE_SCHEME_VERSION_INFO = "Add share link table"
     }
 
     init {

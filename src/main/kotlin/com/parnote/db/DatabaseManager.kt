@@ -30,13 +30,14 @@ class DatabaseManager(
             DatabaseMigration_5_6(),
             DatabaseMigration_6_7(),
             DatabaseMigration_7_8(),
-            DatabaseMigration_8_9()
+            DatabaseMigration_8_9(),
+            DatabaseMigration_9_10()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 9
-        const val DATABASE_SCHEME_VERSION_INFO = "Add foreign keys"
+        const val DATABASE_SCHEME_VERSION = 10
+        const val DATABASE_SCHEME_VERSION_INFO = "Convert token field to token_id in share_link table."
     }
 
     init {

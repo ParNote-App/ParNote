@@ -68,11 +68,11 @@ class DatabaseManager(
         var currentIndex = 0
 
         fun invoke() {
-            val localHandler: (AsyncResult<*>) -> Unit = {
+            val localHandler: (AsyncResult<*>) -> Unit = { result ->
                 fun check() {
                     when {
-                        it.failed() -> closeConnection(sqlConnection) {
-                            mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                        result.failed() -> closeConnection(sqlConnection) {
+                            mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}, error: ${result.cause()}")
                         }
                         currentIndex == handlers.lastIndex -> closeConnection(sqlConnection)
                         else -> {
@@ -83,12 +83,12 @@ class DatabaseManager(
                     }
                 }
 
-                if (it.succeeded())
+                if (result.succeeded())
                     mMigrations[currentIndex].updateSchemeVersion(sqlConnection)
                         .invoke { updateSchemeVersion ->
                             if (updateSchemeVersion.failed())
                                 closeConnection(sqlConnection) {
-                                    mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                                    mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}, error: ${updateSchemeVersion.cause()}")
                                 }
                             else
                                 check()

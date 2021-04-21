@@ -184,4 +184,31 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getNoteByID(
+        noteID: Int,
+        sqlConnection: SQLConnection,
+        handler: (note: Note?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `user_id`, `title`, `text`, `last_modified`, `status`, `favorite` FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(noteID)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val row = queryResult.result().results[0]
+                val note = Note(
+                    row.getInteger(0),
+                    row.getInteger(1),
+                    row.getString(2),
+                    row.getString(3),
+                    row.getString(4),
+                    row.getInteger(5),
+                    row.getBoolean(6)
+                )
+
+                handler.invoke(note, queryResult)
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

@@ -52,4 +52,10 @@ interface NoteDao : Dao<Note> {
         sqlConnection: SQLConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getNoteByID(
+        noteID: Int,
+        sqlConnection: SQLConnection,
+        handler: (note: Note?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

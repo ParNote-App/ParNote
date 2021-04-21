@@ -15,7 +15,8 @@ object TokenUtil {
     enum class SUBJECT {
         LOGIN_SESSION,
         VERIFY_MAIL,
-        RESET_PASSWORD
+        RESET_PASSWORD,
+        SHARE_LINK
     }
 
     fun createToken(
@@ -49,7 +50,7 @@ object TokenUtil {
                 )
                 .compact()
 
-            if (subject != SUBJECT.LOGIN_SESSION)
+            if (subject != SUBJECT.LOGIN_SESSION && subject != SUBJECT.SHARE_LINK)
                 databaseManager.getDatabase().tokenDao.isAnyTokenExistByUserIDAndSubject(
                     userID,
                     subject.toString(),

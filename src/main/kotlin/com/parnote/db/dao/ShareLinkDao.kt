@@ -19,4 +19,10 @@ interface ShareLinkDao : Dao<ShareLink> {
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getNoteIDByTokenID(
+        tokenID: Int,
+        sqlConnection: SQLConnection,
+        handler: (noteID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

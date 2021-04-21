@@ -50,4 +50,20 @@ class ShareLinkDaoImpl(override val tableName: String = "share_link") : DaoImpl(
                 handler.invoke(null, it)
         }
     }
+
+    override fun deleteByTokenID(
+        tokenID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `token_id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(tokenID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

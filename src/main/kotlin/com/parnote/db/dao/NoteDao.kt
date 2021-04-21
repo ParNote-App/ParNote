@@ -58,4 +58,11 @@ interface NoteDao : Dao<Note> {
         sqlConnection: SQLConnection,
         handler: (note: Note?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun searchByUserID(
+        query: String,
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (notes: List<Note>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

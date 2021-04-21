@@ -53,4 +53,10 @@ interface TokenDao : Dao<Token> {
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getTokenByToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (token: Token?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

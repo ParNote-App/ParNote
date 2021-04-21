@@ -165,4 +165,30 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getTokenByToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (token: Token?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `token`, `created_time`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val row = queryResult.result().results[0]
+                val token = Token(
+                    row.getInteger(0),
+                    row.getString(1),
+                    row.getInteger(2),
+                    row.getString(3)
+                )
+
+                handler.invoke(
+                    token, queryResult
+                )
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
 }

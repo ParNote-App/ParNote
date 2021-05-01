@@ -58,7 +58,8 @@ class RouterModule(private val mVertx: Vertx) {
             DeleteNoteAPI(),
             SettingsChangePasswordAPI(),
             SettingsDeleteAccountAPI(),
-            SearchAPI()
+            SearchAPI(),
+            GetShareLinkAPI()
         )
     }
 

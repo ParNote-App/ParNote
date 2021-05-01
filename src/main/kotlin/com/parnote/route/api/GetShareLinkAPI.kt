@@ -5,7 +5,7 @@ import com.parnote.model.*
 import io.vertx.ext.web.RoutingContext
 
 class GetShareLinkAPI : LoggedInApi() {
-    override val routes = arrayListOf("/api/auth/getShareLinkApi")
+    override val routes = arrayListOf("/api/shareLink/get")
 
     override val routeType = RouteType.POST
 
@@ -47,7 +47,10 @@ class GetShareLinkAPI : LoggedInApi() {
                         return@getTokenByToken
                     }
 
-                    databaseManager.getDatabase().shareLinkDao.getNoteIDByTokenID(token.id, sqlConnection) { noteID, _ ->
+                    databaseManager.getDatabase().shareLinkDao.getNoteIDByTokenID(
+                        token.id,
+                        sqlConnection
+                    ) { noteID, _ ->
                         if (noteID == null) {
                             databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_68))

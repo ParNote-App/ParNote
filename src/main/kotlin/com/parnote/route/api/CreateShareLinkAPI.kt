@@ -22,7 +22,7 @@ class CreateShareLinkAPI : LoggedInApi() {
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_73))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_75))
 
                 return@createConnection
             }
@@ -33,7 +33,7 @@ class CreateShareLinkAPI : LoggedInApi() {
             ) { exists: Boolean?, _: AsyncResult<*> ->
                 if (exists == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_66))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_76))
                     }
 
                     return@isExistsByID
@@ -41,7 +41,7 @@ class CreateShareLinkAPI : LoggedInApi() {
 
                 if (!exists) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.NOT_EXISTS))
+                        handler.invoke(Error(ErrorCode.NOT_EXIST))
                     }
 
                     return@isExistsByID
@@ -52,7 +52,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                 ) { userID: Int?, _: AsyncResult<*>? ->
                     if (userID == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_67))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_77))
                         }
 
                         return@getUserIDFromSessionOrCookie
@@ -64,7 +64,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                     ) { note: Note?, _: AsyncResult<*> ->
                         if (note == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_68))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_78))
                             }
 
                             return@getNoteByID
@@ -72,7 +72,7 @@ class CreateShareLinkAPI : LoggedInApi() {
 
                         if (userID != note.userID) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_69))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_79))
                             }
 
                             return@getNoteByID
@@ -86,7 +86,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                         ) { token: String?, _: AsyncResult<*> ->
                             if (token == null) {
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_70))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_80))
                                 }
 
                                 return@createToken
@@ -98,7 +98,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                             ) { token: Token?, _: AsyncResult<*> ->
                                 if (token == null) {
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_71))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_81))
                                     }
 
                                     return@getTokenByToken
@@ -110,7 +110,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                                 ) { result: Result?, _: AsyncResult<*> ->
                                     databaseManager.closeConnection(sqlConnection) {
                                         if (result == null) {
-                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_72))
+                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_82))
 
                                             return@closeConnection
                                         }

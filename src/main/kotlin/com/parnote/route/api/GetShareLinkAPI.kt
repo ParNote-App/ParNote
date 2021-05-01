@@ -60,21 +60,21 @@ class GetShareLinkAPI : LoggedInApi() {
                         }
 
                         databaseManager.getDatabase().noteDao.getNoteByID(noteID, sqlConnection) { note, _ ->
-                            if (note == null) {
-                                databaseManager.closeConnection(sqlConnection) {
+                            databaseManager.closeConnection(sqlConnection) {
+                                if (note == null) {
                                     handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_69))
+
+                                    return@closeConnection
                                 }
 
-                                return@getNoteByID
-                            }
-
-                            handler.invoke(
-                                Successful(
-                                    mapOf(
-                                        "note" to note,
+                                handler.invoke(
+                                    Successful(
+                                        mapOf(
+                                            "note" to note,
+                                        )
                                     )
                                 )
-                            )
+                            }
                         }
                     }
                 }

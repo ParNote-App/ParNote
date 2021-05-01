@@ -74,6 +74,7 @@ class CreateShareLinkAPI : LoggedInApi() {
                             databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_69))
                             }
+
                             return@getNoteByID
                         }
 

@@ -19,7 +19,6 @@ class SearchAPI : LoggedInApi() {
             if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_73))
 
-
                 return@createConnection
             }
 
@@ -40,18 +39,18 @@ class SearchAPI : LoggedInApi() {
                     databaseManager.closeConnection(sqlConnection) {
                         if (notes == null) {
                             handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_74))
+
+                            return@closeConnection
                         }
 
-                        return@closeConnection
-                    }
-
-                    handler.invoke(
-                        Successful(
-                            mapOf(
-                                "note" to notes,
+                        handler.invoke(
+                            Successful(
+                                mapOf(
+                                    "note" to notes,
+                                )
                             )
                         )
-                    )
+                    }
                 }
             }
         }

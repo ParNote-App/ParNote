@@ -5,14 +5,12 @@ import com.parnote.model.*
 import com.parnote.util.LoginUtil
 import io.vertx.ext.web.RoutingContext
 
-
-
 class SearchAPI : LoggedInApi() {
-    override val routes = arrayListOf("/api/auth/searchApi")
+    override val routes = arrayListOf("/api/notes/search")
 
     override val routeType = RouteType.POST
 
-    override fun getHandler(context: RoutingContext, handler: (com.parnote.model.Result) -> Unit) {
+    override fun getHandler(context: RoutingContext, handler: (Result) -> Unit) {
         val data = context.bodyAsJson
 
         val query = data.getString("query")
@@ -25,7 +23,6 @@ class SearchAPI : LoggedInApi() {
                 return@createConnection
             }
 
-
             LoginUtil.getUserIDFromSessionOrCookie(context, sqlConnection, databaseManager) { userID, _ ->
                 if (userID == null) {
                     databaseManager.closeConnection(sqlConnection) {
@@ -33,14 +30,13 @@ class SearchAPI : LoggedInApi() {
                     }
 
                     return@getUserIDFromSessionOrCookie
-
                 }
 
                 databaseManager.getDatabase().noteDao.searchByUserID(
                     query,
                     userID,
                     sqlConnection
-                ) { notes, asyncResult ->
+                ) { notes, _ ->
                     databaseManager.closeConnection(sqlConnection) {
                         if (notes == null) {
                             handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_74))
@@ -53,15 +49,12 @@ class SearchAPI : LoggedInApi() {
                         Successful(
                             mapOf(
                                 "note" to notes,
-
-                                )
+                            )
                         )
                     )
                 }
             }
         }
-
-
     }
 }
 

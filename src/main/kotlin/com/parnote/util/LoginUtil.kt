@@ -89,7 +89,7 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedIn: Boolean, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<String?>(SESSION_NAME)
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
 
         if (session != null) {
             handler.invoke(true, null)
@@ -136,7 +136,7 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedOut: Result?, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<String?>(SESSION_NAME)
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
 
         if (session != null) {
             routingContext.session().destroy()
@@ -184,5 +184,41 @@ object LoginUtil {
         }
 
         handler.invoke(Successful(), null)
+    }
+
+    fun getUserIDFromSessionOrCookie(
+        routingContext: RoutingContext,
+        sqlConnection: SQLConnection,
+        databaseManager: DatabaseManager,
+        handler: (userID: Int?, asyncResult: AsyncResult<*>?) -> Unit
+    ) {
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
+
+        if (session == null) {
+            val cookie = routingContext.getCookie(COOKIE_NAME)
+
+            if (cookie == null) {
+                handler.invoke(null, null)
+            }
+
+            val token = cookie.value
+
+            databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+                token,
+                sqlConnection
+            ) { userID, asyncResultOfGetUserIDFromToken ->
+                if (userID == null) {
+                    handler.invoke(null, asyncResultOfGetUserIDFromToken)
+
+                    return@getUserIDFromToken
+                }
+
+                handler.invoke(userID, asyncResultOfGetUserIDFromToken)
+            }
+
+            return
+        }
+
+        handler.invoke(session, null)
     }
 }

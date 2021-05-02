@@ -1,9 +1,7 @@
 package com.parnote.db
 
 import com.parnote.config.ConfigManager
-import com.parnote.db.migration.DatabaseMigration_1_2
-import com.parnote.db.migration.DatabaseMigration_2_3
-import com.parnote.db.migration.DatabaseMigration_3_4
+import com.parnote.db.migration.*
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
@@ -24,16 +22,22 @@ class DatabaseManager(
     }
 
     private val mMigrations by lazy {
-        listOf<DatabaseMigration>(
+        listOf(
             DatabaseMigration_1_2(),
             DatabaseMigration_2_3(),
-            DatabaseMigration_3_4()
+            DatabaseMigration_3_4(),
+            DatabaseMigration_4_5(),
+            DatabaseMigration_5_6(),
+            DatabaseMigration_6_7(),
+            DatabaseMigration_7_8(),
+            DatabaseMigration_8_9(),
+            DatabaseMigration_9_10()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 4
-        const val DATABASE_SCHEME_VERSION_INFO = "Add permission table"
+        const val DATABASE_SCHEME_VERSION = 10
+        const val DATABASE_SCHEME_VERSION_INFO = "Convert token field to token_id in share_link table."
     }
 
     init {
@@ -41,7 +45,7 @@ class DatabaseManager(
     }
 
     private fun checkMigration() {
-        createConnection { sqlConnection, asyncResult ->
+        createConnection { sqlConnection, _ ->
             if (sqlConnection != null) {
                 mDatabase.schemeVersionDao.getLastSchemeVersion(sqlConnection) { schemeVersion, _ ->
                     if (schemeVersion == null)
@@ -65,11 +69,11 @@ class DatabaseManager(
         var currentIndex = 0
 
         fun invoke() {
-            val localHandler: (AsyncResult<*>) -> Unit = {
+            val localHandler: (AsyncResult<*>) -> Unit = { result ->
                 fun check() {
                     when {
-                        it.failed() -> closeConnection(sqlConnection) {
-                            mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                        result.failed() -> closeConnection(sqlConnection) {
+                            mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}, error: ${result.cause()}")
                         }
                         currentIndex == handlers.lastIndex -> closeConnection(sqlConnection)
                         else -> {
@@ -80,12 +84,12 @@ class DatabaseManager(
                     }
                 }
 
-                if (it.succeeded())
+                if (result.succeeded())
                     mMigrations[currentIndex].updateSchemeVersion(sqlConnection)
                         .invoke { updateSchemeVersion ->
                             if (updateSchemeVersion.failed())
                                 closeConnection(sqlConnection) {
-                                    mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                                    mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}, error: ${updateSchemeVersion.cause()}")
                                 }
                             else
                                 check()

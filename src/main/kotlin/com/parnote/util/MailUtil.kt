@@ -20,45 +20,95 @@ object MailUtil {
     ) {
         ACTIVATION(
             TokenUtil.SUBJECT.VERIFY_MAIL,
-            "/activate?token={0}",
+            "/activate?token=%s",
             "view/mail/VerifyEmailMail.hbs",
             mapOf<LangType, Map<String, Any>>(
                 LangType.TR to mapOf<String, Any>(
                     "subject" to "E-Mail Aktivasyonu",
                     "template-params" to JsonObject()
+                        .put("page-title", "Hesap Aktivasyonu")
+                        .put("title", "E-Posta Adresini Doğrula")
+                        .put("description", "Hesabınızda oturum açmak için bu e-posta adresini doğrulamanız gerekir.")
+                        .put("button-text", "E-posta Adresimi Doğrula")
                 ),
-                LangType.EN_US to mapOf<String, Any>(
+                LangType.EN to mapOf<String, Any>(
                     "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
                         .put("title", "Verify E-mail Address")
                         .put("description", "To login your account, you need to verify this e-mail address.")
                         .put("button-text", "Verify My E-Mail Address")
                 ),
                 LangType.HU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "E-Mail Verification",
                     "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
+                        .put("title", "Verify E-mail Address")
+                        .put("description", "To login your account, you need to verify this e-mail address.")
+                        .put("button-text", "Verify My E-Mail Address")
+                ),
+                LangType.RU to mapOf<String, Any>(
+                    "subject" to "Подтверждение E-Mail",
+                    "template-params" to JsonObject()
+                        .put("page-title", "Подтверждение Аккаунта")
+                        .put("title", "Подтвердите E-Mail")
+                        .put("description", "Для входа в аккаунт необходимо подтведить e-mail.")
+                        .put("button-text", "Подтвердить мой аккаунт")
+                ),
+                LangType.DE to mapOf<String, Any>(
+                    "subject" to "E-Mail Verification",
+                    "template-params" to JsonObject()
+                        .put("page-title", "Account Verification")
+                        .put("title", "Verify E-mail Address")
+                        .put("description", "To login your account, you need to verify this e-mail address.")
+                        .put("button-text", "Verify My E-Mail Address")
                 ),
             )
         ),
         RESET_PASSWORD(
             TokenUtil.SUBJECT.RESET_PASSWORD,
-            "/reset-password?token={0}",
+            "/reset-password?token=%s",
             "view/mail/ResetPasswordMail.hbs",
             mapOf<LangType, Map<String, Any>>(
                 LangType.TR to mapOf<String, Any>(
                     "subject" to "Şifre Sıfırla",
                     "template-params" to JsonObject()
+                        .put("page-title", "Şifre Sıfırlama")
+                        .put("title", "Şifre Sıfırlama")
+                        .put("description", "Bu isteği siz yapmadıysanız, lütfen bu e-postayı dikkate almayın.")
+                        .put("button-text", "Şifremi Sıfırla")
                 ),
-                LangType.EN_US to mapOf<String, Any>(
+                LangType.EN to mapOf<String, Any>(
                     "subject" to "Reset Password",
                     "template-params" to JsonObject()
+                        .put("page-title", "Reset Password")
                         .put("title", "Reset Password")
-                        .put("description", "If you didn't do this request, please change your password!")
+                        .put("description", "If you didn't do this request, please ignore this e-mail.")
                         .put("button-text", "Reset My Password")
                 ),
                 LangType.HU to mapOf<String, Any>(
-                    "subject" to "",
+                    "subject" to "Jelszó visszaállítása",
                     "template-params" to JsonObject()
+                        .put("page-title", "Jelszó visszaállítása")
+                        .put("title", "Jelszó visszaállítása")
+                        .put("description", "Ha nem tette meg ezt a kérést, hagyja figyelmen kívül ezt az e-mailt.")
+                        .put("button-text", "Jelszavam visszaállítása")
+                ),
+                LangType.RU to mapOf<String, Any>(
+                    "subject" to "Сбросить Пароль",
+                    "template-params" to JsonObject()
+                        .put("page-title", "Сбросить Пароль")
+                        .put("title", "Сбросить Пароль")
+                        .put("description", "Если вы не подавали запрос, то пожалуйста проигнорируйте это сообщение.")
+                        .put("button-text", "Сбросить Пароль")
+                ),
+                LangType.DE to mapOf<String, Any>(
+                    "subject" to "Passwort zurücksetzen",
+                    "template-params" to JsonObject()
+                        .put("page-title", "Passwort zurücksetzen")
+                        .put("title", "Passwort zurücksetzen")
+                        .put("description", "Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.")
+                        .put("button-text", "Setze mein Passwort zurück")
                 )
             )
         )
@@ -66,8 +116,10 @@ object MailUtil {
 
     enum class LangType {
         TR,
-        EN_US,
-        HU
+        EN, // EN (US)
+        HU,
+        RU,
+        DE
     }
 
     fun sendMail(

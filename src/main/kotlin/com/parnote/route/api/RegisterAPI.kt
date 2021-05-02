@@ -50,6 +50,8 @@ class RegisterAPI : Api() {
         val password = data.getString("password")
         val termsBox = data.getBoolean("termsBox")
         val reCaptcha = data.getString("recaptcha")
+        val lang = data.getString("lang")
+
         val ipAddress = context.request().remoteAddress().host()
 
         validateForm(
@@ -61,7 +63,7 @@ class RegisterAPI : Api() {
             termsBox,
             reCaptcha,
             handler,
-            (this::validateFormHandler)(handler, email, username, password, ipAddress)
+            (this::validateFormHandler)(lang, handler, email, name, surname, username, password, ipAddress)
         )
     }
 
@@ -69,93 +71,111 @@ class RegisterAPI : Api() {
         name: String, surname: String, username: String, email: String, password: String, termsBox: Boolean,
         reCaptcha: String, errorHandler: (result: Result) -> Unit, successHandler: () -> Unit
     ) {
-
         if (name.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_EMPTY))
+
             return
         }
 
         if (name.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_SHORT))
+
             return
         }
 
         if (name.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_LONG))
+
             return
         }
 
         if (surname.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_EMPTY))
+
             return
         }
 
         if (surname.length < 2) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_SHORT))
+
             return
         }
 
         if (surname.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_LONG))
+
             return
         }
 
-        if (!name.matches(Regex("^[A-Za-z0-9_-]*$"))) {
+        if (!name.matches(Regex("^[\\p{L} ]+$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NAME_INVALID))
+
             return
         }
 
-        if (!surname.matches(Regex("^[A-Za-z0-9_-]*$"))) {
+        if (!surname.matches(Regex("^[\\p{L}]+\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_SURNAME_INVALID))
-        }
 
+            return
+        }
 
         if (username.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_EMPTY))
+
             return
         }
 
         if (username.length < 3) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_SHORT))
+
             return
         }
 
         if (username.length > 32) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_LONG))
+
             return
         }
 
         if (!username.matches(Regex("^[a-zA-Z0-9_]+\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_USERNAME_INVALID))
+
             return
         }
 
         if (email.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_EMPTY))
+
             return
         }
 
         if (!email.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_INVALID))
+
             return
         }
 
         if (password.isEmpty()) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_EMPTY))
+
             return
         }
 
         if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_PASSWORD_INVALID))
+
+            return
         }
 
         if (!termsBox) {
             errorHandler.invoke(Error(ErrorCode.REGISTER_NOT_ACCEPTED_TERMS))
+
             return
         }
 
         if (!this.reCaptcha.isValid(reCaptcha)) {
             errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+
             return
         }
 
@@ -163,18 +183,35 @@ class RegisterAPI : Api() {
     }
 
     private fun validateFormHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String
     ) = { ->
-        databaseManager.createConnection((this::createConnectionHandler)(handler, email, username, password, ipAddress))
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                lang,
+                handler,
+                email,
+                name,
+                surname,
+                username,
+                password,
+                ipAddress
+            )
+        )
     }
 
     private fun createConnectionHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String
@@ -188,13 +225,26 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isEmailExists(
             email,
             sqlConnection,
-            (this::isEmailExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+            (this::isEmailExistsHandler)(
+                lang,
+                handler,
+                email,
+                name,
+                surname,
+                username,
+                password,
+                ipAddress,
+                sqlConnection
+            )
         )
     }
 
     private fun isEmailExistsHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String,
@@ -210,7 +260,7 @@ class RegisterAPI : Api() {
 
         if (emailExists) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.TAKEN_EMAIL_ERROR))
+                handler.invoke(Error(ErrorCode.REGISTER_TAKEN_EMAIL_ERROR))
             }
 
             return@handler
@@ -219,13 +269,26 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.isUsernameExists(
             username,
             sqlConnection,
-            (this::isUsernameExistsHandler)(handler, email, username, password, ipAddress, sqlConnection)
+            (this::isUsernameExistsHandler)(
+                lang,
+                handler,
+                email,
+                name,
+                surname,
+                username,
+                password,
+                ipAddress,
+                sqlConnection
+            )
         )
     }
 
     private fun isUsernameExistsHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         email: String,
+        name: String,
+        surname: String,
         username: String,
         password: String,
         ipAddress: String,
@@ -233,7 +296,7 @@ class RegisterAPI : Api() {
     ) = handler@{ usernameExists: Boolean?, _: AsyncResult<*> ->
         if (usernameExists == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_13))
             }
 
             return@handler
@@ -241,7 +304,7 @@ class RegisterAPI : Api() {
 
         if (usernameExists) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.TAKEN_USERNAME_ERROR))
+                handler.invoke(Error(ErrorCode.REGISTER_TAKEN_USERNAME_ERROR))
             }
 
             return@handler
@@ -249,20 +312,21 @@ class RegisterAPI : Api() {
 
         RegisterUtil.register(
             databaseManager,
-            User(-1, username, email, password, ipAddress),
+            User(-1, name, surname, username, email, password, ipAddress),
             sqlConnection,
-            (this::registerHandler)(handler, username, sqlConnection)
+            (this::registerHandler)(lang, handler, username, sqlConnection)
         )
     }
 
     private fun registerHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         username: String,
-        sqlConnection: SQLConnection
+        sqlConnection: SQLConnection,
     ) = handler@{ isEnrolled: Result? ->
         if (isEnrolled == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_15))
             }
 
             return@handler
@@ -271,17 +335,18 @@ class RegisterAPI : Api() {
         databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
             username,
             sqlConnection,
-            (this::getUserIDFromUsernameOrEmailHandler)(handler, sqlConnection)
+            (this::getUserIDFromUsernameOrEmailHandler)(lang, handler, sqlConnection)
         )
     }
 
     private fun getUserIDFromUsernameOrEmailHandler(
+        lang: String,
         handler: (result: Result) -> Unit,
         sqlConnection: SQLConnection
     ) = handler@{ userID: Int?, _: AsyncResult<*> ->
         if (userID == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_17))
             }
 
             return@handler
@@ -290,7 +355,7 @@ class RegisterAPI : Api() {
         MailUtil.sendMail(
             userID,
             MailUtil.MailType.ACTIVATION,
-            MailUtil.LangType.EN_US,
+            MailUtil.LangType.valueOf(lang.toUpperCase()),
             sqlConnection,
             templateEngine,
             configManager,

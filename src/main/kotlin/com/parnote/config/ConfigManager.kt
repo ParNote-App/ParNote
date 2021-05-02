@@ -41,27 +41,27 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                 mapOf(
                     "config-version" to CONFIG_VERSION,
 
-                    "recaptcha-secret" to "",
+                    "recaptcha-secret" to System.getProperty("recaptcha.secret", ""),
 
                     "database" to mapOf(
-                        "host" to "",
-                        "name" to "",
-                        "username" to "",
-                        "password" to "",
-                        "prefix" to "parnote_"
+                        "host" to System.getProperty("db.host", ""),
+                        "name" to System.getProperty("db.name", ""),
+                        "username" to System.getProperty("db.username", ""),
+                        "password" to System.getProperty("db.password", ""),
+                        "prefix" to System.getProperty("db.prefix", "parnote_")
                     ),
 
                     "email" to mapOf(
-                        "address" to "",
-                        "host" to "",
-                        "port" to 465,
-                        "username" to "",
-                        "password" to "",
-                        "SSL" to true
+                        "address" to System.getProperty("email.address", ""),
+                        "host" to System.getProperty("email.host", ""),
+                        "port" to Integer.getInteger("email.port", 465),
+                        "username" to System.getProperty("email.username", ""),
+                        "password" to System.getProperty("email.password", ""),
+                        "SSL" to (System.getProperty("email.ssl", "1") == "1")
                     ),
 
                     "resourcesDir" to "src/main/resources/",
-                    "ui-address" to "localhost:5000"
+                    "ui-address" to System.getProperty("ui.address", "http://localhost:5000")
                 )
             )
         }

@@ -21,6 +21,8 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
+              `name` varchar(255) NOT NULL,
+              `surname` varchar(255) NOT NULL,
               `username` varchar(16) NOT NULL UNIQUE,
               `email` varchar(255) NOT NULL UNIQUE,
               `password` varchar(255) NOT NULL,
@@ -30,8 +32,10 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
               `public_key` text NOT NULL,
               `register_date` MEDIUMTEXT NOT NULL,
               `email_verified` int(1) NOT NULL DEFAULT 0,
+                constraint ${getTablePrefix()}user_${getTablePrefix()}permission_id_fk
+                    foreign key (permission_id) references ${getTablePrefix()}permission (id),
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='User Table';
         """
             ) {
                 handler.invoke(it)
@@ -113,14 +117,16 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (isSuccessful: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?); "
+            "INSERT INTO `${getTablePrefix() + tableName}` (name, surname, username, email, password, permission_id, registered_ip, secret_key, public_key, register_date) " +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?); "
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
         sqlConnection.queryWithParams(
             query,
             JsonArray()
+                .add(user.name)
+                .add(user.surname)
                 .add(user.username)
                 .add(user.email)
                 .add(DigestUtils.md5Hex(user.password))
@@ -233,6 +239,67 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             query,
             JsonArray().add(DigestUtils.md5Hex(newPassword)).add(userID)
         ) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun getUser(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `name`, `surname`, `username`, `email`, `permission_id`, `email_verified` FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(
+                    User(
+                        userID,
+                        queryResult.result().results[0].getString(0),
+                        queryResult.result().results[0].getString(1),
+                        queryResult.result().results[0].getString(2),
+                        queryResult.result().results[0].getString(3),
+                        "",
+                        "",
+                        queryResult.result().results[0].getInteger(4),
+                        queryResult.result().results[0].getInteger(5) == 1
+                    ), queryResult
+                )
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun isCorrectPasswordByUserID(
+        userID: Int,
+        password: String,
+        sqlConnection: SQLConnection,
+        handler: (isCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where `id` = ? and `password` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID).add(DigestUtils.md5Hex(password))) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(userID)) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(Successful(), queryResult)
             else

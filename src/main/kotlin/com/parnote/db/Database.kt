@@ -1,24 +1,22 @@
 package com.parnote.db
 
-import com.parnote.db.dao.PermissionDao
-import com.parnote.db.dao.SchemeVersionDao
-import com.parnote.db.dao.TokenDao
-import com.parnote.db.dao.UserDao
-import com.parnote.db.entity.PermissionDaoImpl
-import com.parnote.db.entity.SchemeVersionDaoImpl
-import com.parnote.db.entity.TokenDaoImpl
-import com.parnote.db.entity.UserDaoImpl
+import com.parnote.db.dao.*
+import com.parnote.db.entity.*
 
 data class Database(
     val schemeVersionDao: SchemeVersionDao = SchemeVersionDaoImpl(),
+    val permissionDao: PermissionDao = PermissionDaoImpl(),
     val userDao: UserDao = UserDaoImpl(),
     val tokenDao: TokenDao = TokenDaoImpl(),
-    val permissionDao: PermissionDao = PermissionDaoImpl()
+    val noteDao: NoteDao = NoteDaoImpl(),
+    val shareLinkDao: ShareLinkDao = ShareLinkDaoImpl()
 ) {
     fun init() = listOf(
         schemeVersionDao.init(),
+        permissionDao.init(),
         userDao.init(),
         tokenDao.init(),
-        permissionDao.init()
+        noteDao.init(),
+        shareLinkDao.init()
     )
 }

@@ -11,6 +11,6 @@ class ConfigMigration_2_3(
 ) : ConfigMigration() {
     override fun migrate(configManager: ConfigManager) {
         configManager.getConfig()["resourcesDir"] = "src/main/resources/"
-        configManager.getConfig()["ui-address"] = "localhost:5000"
+        configManager.getConfig()["ui-address"] = "http://localhost:5000"
     }
 }

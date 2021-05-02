@@ -1,16 +1,14 @@
 package com.parnote.route.api
 
-
 import com.parnote.ErrorCode
 import com.parnote.Main
-import com.parnote.config.ConfigManager
 import com.parnote.db.DatabaseManager
+import com.parnote.db.model.Token
 import com.parnote.model.*
-import com.parnote.util.MailUtil
+import com.parnote.util.TokenUtil
 import de.triology.recaptchav2java.ReCaptcha
-import io.vertx.ext.mail.MailClient
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ResetPasswordAPI : Api() {
@@ -28,80 +26,119 @@ class ResetPasswordAPI : Api() {
     @Inject
     lateinit var reCaptcha: ReCaptcha
 
-    @Inject
-    lateinit var configManager: ConfigManager
-
-    @Inject
-    lateinit var mailClient: MailClient
-
-    @Inject
-    lateinit var templateEngine: HandlebarsTemplateEngine
-
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
-        val usernameOrEmail = data.getString("usernameOrEmail")
+        val newPassword = data.getString("newPassword")
+        val newPasswordRepeat = data.getString("newPasswordRepeat")
         val reCaptcha = data.getString("recaptcha")
+        val token = data.getString("token")
 
-        validateForm(usernameOrEmail, reCaptcha, handler) {
+        validateForm(newPassword, newPasswordRepeat, reCaptcha, token, handler) {
             databaseManager.createConnection { sqlConnection, _ ->
                 if (sqlConnection == null) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_8))
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_14))
 
                     return@createConnection
                 }
 
-                databaseManager.getDatabase().userDao.isExistsByUsernameOrEmail(
-                    usernameOrEmail,
-                    sqlConnection
-                ) { exists, _ ->
+                databaseManager.getDatabase().tokenDao.isTokenExists(token, sqlConnection) { exists, _ ->
                     if (exists == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_16))
                         }
 
-                        return@isExistsByUsernameOrEmail
+                        return@isTokenExists
                     }
 
                     if (!exists) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_USER_NOT_EXISTS))
+                            handler.invoke(Error(ErrorCode.RESET_PASSWORD_INVALID_TOKEN))
                         }
 
-                        return@isExistsByUsernameOrEmail
+                        return@isTokenExists
                     }
-
-                    databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
-                        usernameOrEmail,
+                    databaseManager.getDatabase().tokenDao.getCreatedTimeByToken(
+                        token,
                         sqlConnection
-                    ) { userID, _ ->
-                        if (userID == null) {
+                    ) { createdTime, _ ->
+                        if (createdTime == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_19))
                             }
 
-                            return@getUserIDFromUsernameOrEmail
+                            return@getCreatedTimeByToken
                         }
 
-                        MailUtil.sendMail(
-                            userID,
-                            MailUtil.MailType.RESET_PASSWORD,
-                            MailUtil.LangType.EN_US, // TODO get lang from remote
-                            sqlConnection,
-                            templateEngine,
-                            configManager,
-                            databaseManager,
-                            mailClient
-                        ) { result, _ ->
-                            if (result == null) {
+                        val thirtyMinInMill = TimeUnit.MINUTES.toMillis(30)
+
+                        if (System.currentTimeMillis() > (createdTime + thirtyMinInMill)) {
+                            databaseManager.getDatabase().tokenDao.delete(
+                                Token(
+                                    -1,
+                                    token,
+                                    -1,
+                                    TokenUtil.SUBJECT.RESET_PASSWORD.toString()
+                                ), sqlConnection
+                            ) { resultOfDeleteToken, _ ->
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
+                                    if (resultOfDeleteToken == null) {
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
+
+                                        return@closeConnection
+                                    }
+
+                                    handler.invoke(Error(ErrorCode.RESET_PASSWORD_INVALID_TOKEN))
+                                }
+                            }
+
+                            return@getCreatedTimeByToken
+                        }
+
+                        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+                            token,
+                            sqlConnection
+                        ) { userID, _ ->
+                            if (userID == null) {
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_21))
                                 }
 
-                                return@sendMail
+                                return@getUserIDFromToken
                             }
 
-                            handler.invoke(Successful())
+                            databaseManager.getDatabase().userDao.changePasswordByID(
+                                userID,
+                                newPassword,
+                                sqlConnection
+                            ) { result, _ ->
+                                if (result == null) {
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_23))
+                                    }
+
+                                    return@changePasswordByID
+                                }
+
+                                databaseManager.getDatabase().tokenDao.delete(
+                                    Token(
+                                        -1,
+                                        token,
+                                        -1,
+                                        TokenUtil.SUBJECT.RESET_PASSWORD.toString()
+                                    ), sqlConnection
+                                ) { resultOfDeleteToken, _ ->
+                                    databaseManager.closeConnection(sqlConnection) {
+                                        if (resultOfDeleteToken == null) {
+                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_65))
+
+                                            return@closeConnection
+                                        }
+
+                                        handler.invoke(Successful())
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -110,29 +147,57 @@ class ResetPasswordAPI : Api() {
     }
 
     private fun validateForm(
-        usernameOrEmail: String,
+        newPassword: String,
+        newPasswordRepeat: String,
         reCaptcha: String,
+        token: String,
         errorHandler: (result: Result) -> Unit,
         successHandler: () -> Unit
     ) {
-        if (usernameOrEmail.isEmpty()) {
-            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
+        if (token.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_12))
+
             return
         }
 
-        if (
-            !usernameOrEmail.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$")) && // user email regex
-            !usernameOrEmail.matches(Regex("^[a-zA-Z0-9]+\$")) // username regex
-        ) {
-            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_USERNAME_OR_EMAIL_INVALID))
+        if (newPassword.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_EMPTY))
+
+            return
+        }
+
+        if (newPasswordRepeat.isEmpty()) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_REPEAT_EMPTY))
+
+            return
+        }
+
+        if (newPassword != newPasswordRepeat) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_DOESNT_MATCH))
+
+            return
+        }
+
+        if (!newPassword.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_INVALID))
+
+            return
+        }
+
+        if (!newPasswordRepeat.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
+            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_NEW_PASSWORD_REPEAT_INVALID))
+
             return
         }
 
         if (!this.reCaptcha.isValid(reCaptcha)) {
-            errorHandler.invoke(Error(ErrorCode.RESET_PASSWORD_RECAPTCHA_INVALID))
+            errorHandler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+
             return
         }
 
         successHandler.invoke()
     }
 }
+
+

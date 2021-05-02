@@ -20,8 +20,10 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
               `created_time` MEDIUMTEXT NOT NULL,
               `user_id` int(11) NOT NULL,
               `subject` varchar(255) NOT NULL,
+                constraint ${getTablePrefix()}token_${getTablePrefix()}user_id_fk
+                    foreign key (user_id) references ${getTablePrefix()}user (id),
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Token Table';
         """
             ) {
                 handler.invoke(it)
@@ -98,6 +100,40 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         }
     }
 
+    override fun isAnyTokenExistByUserIDAndSubject(
+        userID: Int,
+        subject: String,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `user_id` = ? AND `subject` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(userID).add(subject)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) != 0, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun deleteByUserIDAndSubject(
+        userID: Int,
+        subject: String,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `user_id` = ? AND `subject` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(userID).add(subject)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
     override fun getCreatedTimeByToken(
         token: String,
         sqlConnection: SQLConnection,
@@ -109,6 +145,64 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getString(0).toLong(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `user_id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(userID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun getTokenByToken(
+        token: String,
+        sqlConnection: SQLConnection,
+        handler: (token: Token?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `token`, `created_time`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `token` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val row = queryResult.result().results[0]
+                val token = Token(
+                    row.getInteger(0),
+                    row.getString(1),
+                    row.getInteger(2),
+                    row.getString(3)
+                )
+
+                handler.invoke(
+                    token, queryResult
+                )
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun deleteByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE `id` = ?"
+
+        sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(), queryResult)
             else
                 handler.invoke(null, queryResult)
         }

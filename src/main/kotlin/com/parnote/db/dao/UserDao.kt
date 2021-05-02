@@ -75,4 +75,23 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUser(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun isCorrectPasswordByUserID(
+        userID: Int,
+        password: String,
+        sqlConnection: SQLConnection,
+        handler: (isCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun deleteByUserID(
+        userID: Int,
+        sqlConnection: SQLConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

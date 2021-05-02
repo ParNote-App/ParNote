@@ -1,6 +1,5 @@
 package com.parnote.di.module
 
-import com.parnote.model.Api
 import com.parnote.model.RouteType
 import com.parnote.model.Template
 import com.parnote.route.api.*
@@ -41,13 +40,27 @@ class RouterModule(private val mVertx: Vertx) {
     }
 
     private val mAPIRouteList by lazy {
-        arrayOf<Api>(
+        arrayOf(
             LoginAPI(),
-            ResetPasswordAPI(),
+            ForgotPasswordAPI(),
             RegisterAPI(),
             LogoutAPI(),
             ResetPasswordTokenAPI(),
-            ResetPasswordPageAPI()
+            ResetPasswordAPI(),
+            EmailVerificationAPI(),
+            CheckLoggedInAPI(),
+            InitialLoggedInAPI(),
+            GetUserNotesAPI(),
+            AddNoteAPI(),
+            EditNoteAPI(),
+            MoveNoteTrashAPI(),
+            MoveNoteArchiveAPI(),
+            DeleteNoteAPI(),
+            SettingsChangePasswordAPI(),
+            SettingsDeleteAccountAPI(),
+            SearchAPI(),
+            GetShareLinkAPI(),
+            CreateShareLinkAPI()
         )
     }
 
@@ -80,7 +93,7 @@ class RouterModule(private val mVertx: Vertx) {
         router.route()
             .handler(BodyHandler.create())
             .handler(
-                SessionHandler.create(LocalSessionStore.create(mVertx)).setSessionTimeout(60 * 60 * 24)
+                SessionHandler.create(LocalSessionStore.create(mVertx)).setSessionTimeout(24 * 60 * 60 * 1000)
             ) // 24 hours session timeout
             .handler(
                 CorsHandler.create(".*.")

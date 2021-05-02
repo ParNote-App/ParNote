@@ -4,7 +4,10 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.Main
 import com.parnote.db.DatabaseManager
+import com.parnote.db.model.Token
 import com.parnote.model.*
+import com.parnote.util.TokenUtil
+import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -20,10 +23,20 @@ class EmailVerificationAPI : Api() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
+    @Inject
+    lateinit var reCaptcha: ReCaptcha
+
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val token = data.getString("token")
+        val reCaptcha = data.getString("recaptcha")
+
+        if (!this.reCaptcha.isValid(reCaptcha)) {
+            handler.invoke(Error(ErrorCode.RECAPTCHA_NOT_VALID))
+
+            return
+        }
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {
@@ -59,14 +72,31 @@ class EmailVerificationAPI : Api() {
                     }
 
                     databaseManager.getDatabase().userDao.makeEmailVerifiedByID(userID, sqlConnection) { result, _ ->
-                        databaseManager.closeConnection(sqlConnection) {
-                            if (result == null) {
+                        if (result == null) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_9))
-
-                                return@closeConnection
                             }
 
-                            handler.invoke(Successful())
+                            return@makeEmailVerifiedByID
+                        }
+
+                        databaseManager.getDatabase().tokenDao.delete(
+                            Token(
+                                -1,
+                                token,
+                                -1,
+                                TokenUtil.SUBJECT.VERIFY_MAIL.toString()
+                            ), sqlConnection
+                        ) { resultOfDeleteToken, _ ->
+                            databaseManager.closeConnection(sqlConnection) {
+                                if (resultOfDeleteToken == null) {
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_27))
+
+                                    return@closeConnection
+                                }
+
+                                handler.invoke(Successful())
+                            }
                         }
                     }
                 }

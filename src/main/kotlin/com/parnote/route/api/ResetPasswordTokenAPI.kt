@@ -28,7 +28,7 @@ class ResetPasswordTokenAPI : Api() {
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_8))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_25))
 
                 return@createConnection
             }

@@ -18,7 +18,7 @@ class CreateShareLinkAPI : LoggedInApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
-        val noteID = data.getInteger("noteID")
+        val noteID = data.getInteger("id")
 
         databaseManager.createConnection { sqlConnection, _ ->
             if (sqlConnection == null) {

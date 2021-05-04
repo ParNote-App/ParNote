@@ -1,6 +1,7 @@
 package com.parnote.route.api
 
 import com.parnote.ErrorCode
+import com.parnote.db.model.Token
 import com.parnote.model.*
 import com.parnote.util.LoginUtil
 import io.vertx.core.AsyncResult
@@ -60,7 +61,43 @@ class GetUserNotesAPI : LoggedInApi() {
 
                                     note["shared"] = exists
 
-                                    localHandler.invoke()
+                                    if (!exists) {
+                                        note["sharedToken"] to ""
+
+                                        localHandler.invoke()
+
+                                        return@isLinkExistsByNoteID
+                                    }
+
+                                    databaseManager.getDatabase().shareLinkDao.getTokenIDByNoteID(
+                                        note["id"] as Int,
+                                        sqlConnection
+                                    ) { tokenID: Int?, _: AsyncResult<*> ->
+                                        if (tokenID == null) {
+                                            databaseManager.closeConnection(sqlConnection) {
+                                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_84))
+                                            }
+
+                                            return@getTokenIDByNoteID
+                                        }
+
+                                        databaseManager.getDatabase().tokenDao.getTokenByTokenID(
+                                            tokenID,
+                                            sqlConnection
+                                        ) { token: Token?, _: AsyncResult<*> ->
+                                            if (token == null) {
+                                                databaseManager.closeConnection(sqlConnection) {
+                                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
+                                                }
+
+                                                return@getTokenByTokenID
+                                            }
+
+                                            note["sharedToken"] to token.token
+
+                                            localHandler.invoke()
+                                        }
+                                    }
                                 }
                             }
 

@@ -84,7 +84,7 @@ class SearchAPI : LoggedInApi() {
                                         note["shared"] = exists
 
                                         if (!exists) {
-                                            note["sharedToken"] to ""
+                                            note["sharedToken"] = ""
 
                                             localHandler.invoke()
 
@@ -115,7 +115,7 @@ class SearchAPI : LoggedInApi() {
                                                     return@getTokenByTokenID
                                                 }
 
-                                                note["sharedToken"] to token.token
+                                                note["sharedToken"] = token.token
 
                                                 localHandler.invoke()
                                             }

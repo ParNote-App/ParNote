@@ -3,6 +3,7 @@ package com.parnote.route.api
 import com.parnote.ErrorCode
 import com.parnote.model.*
 import com.parnote.util.LoginUtil
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 
 class GetUserNotesAPI : LoggedInApi() {
@@ -28,21 +29,69 @@ class GetUserNotesAPI : LoggedInApi() {
                 }
 
                 databaseManager.getDatabase().noteDao.getNotesByUserID(userID, sqlConnection) { notes, _ ->
-                    databaseManager.closeConnection(sqlConnection) {
-                        if (notes == null) {
+                    if (notes == null) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_34))
-
-                            return@closeConnection
                         }
 
-                        handler.invoke(
-                            Successful(
-                                mapOf(
-                                    "notes" to notes
-                                )
-                            )
-                        )
+                        return@getNotesByUserID
                     }
+
+                    val mutableNotes = mutableListOf<MutableMap<String, Any?>>()
+
+                    notes.forEach { note ->
+                        mutableNotes.add(note.toMutableMap())
+                    }
+
+                    val handlers: List<(handler: () -> Unit) -> Any> =
+                        mutableNotes.map { note ->
+                            val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                                databaseManager.getDatabase().shareLinkDao.isLinkExistsByNoteID(
+                                    note["id"] as Int,
+                                    sqlConnection
+                                ) { exists: Boolean?, _: AsyncResult<*> ->
+                                    if (exists == null) {
+                                        databaseManager.closeConnection(sqlConnection) {
+                                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_83))
+                                        }
+
+                                        return@isLinkExistsByNoteID
+                                    }
+
+                                    note["shared"] = exists
+
+                                    localHandler.invoke()
+                                }
+                            }
+
+                            localHandler
+                        }
+
+                    var currentIndex = -1
+
+                    fun invoke() {
+                        val localHandler: () -> Unit = {
+                            if (currentIndex == handlers.lastIndex)
+                                databaseManager.closeConnection(sqlConnection) {
+                                    handler.invoke(
+                                        Successful(
+                                            mapOf(
+                                                "notes" to mutableNotes
+                                            )
+                                        )
+                                    )
+                                }
+                            else
+                                invoke()
+                        }
+
+                        currentIndex++
+
+                        if (currentIndex <= handlers.lastIndex)
+                            handlers[currentIndex].invoke(localHandler)
+                    }
+
+                    invoke()
                 }
             }
         }

@@ -75,8 +75,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
             """.trimIndent(),
             JsonArray()
                 .add(note.userID)
-                .add(note.title.toByteArray())
-                .add(note.text.toByteArray())
+                .add(note.title)
+                .add(note.text)
                 .add(System.currentTimeMillis())
                 .add(1)
         ) {
@@ -98,8 +98,8 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
         sqlConnection.updateWithParams(
             query,
             JsonArray()
-                .add(note.title.toByteArray())
-                .add(note.text.toByteArray())
+                .add(note.title)
+                .add(note.text)
                 .add(System.currentTimeMillis())
                 .add(1)
                 .add(note.id)

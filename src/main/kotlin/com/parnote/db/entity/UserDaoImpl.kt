@@ -26,7 +26,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
               `username` varchar(16) NOT NULL UNIQUE,
               `email` varchar(255) NOT NULL UNIQUE,
               `password` varchar(255) NOT NULL,
-              `permission_id` int(11) NOT NULL,
+              `permission_id` int(11),
               `registered_ip` varchar(255) NOT NULL,
               `secret_key` text NOT NULL,
               `public_key` text NOT NULL,

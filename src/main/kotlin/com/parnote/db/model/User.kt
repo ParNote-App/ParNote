@@ -8,6 +8,6 @@ data class User(
     val email: String,
     val password: String,
     val ipAddress: String,
-    val permissionID: Int = 0,
+    val permissionID: Int? = null,
     val emailVerified: Boolean = false
 )

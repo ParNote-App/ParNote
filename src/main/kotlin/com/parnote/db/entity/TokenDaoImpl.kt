@@ -172,7 +172,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         handler: (token: Token?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `token`, `created_time`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `token` = ?"
+            "SELECT `id`, `token`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `token` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -198,7 +198,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         handler: (token: Token?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `token`, `created_time`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
+            "SELECT `id`, `token`, `user_id`, `subject` FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(tokenID)) { queryResult ->
             if (queryResult.succeeded()) {

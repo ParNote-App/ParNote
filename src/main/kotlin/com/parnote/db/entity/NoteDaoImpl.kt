@@ -218,10 +218,13 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
         sqlConnection: SQLConnection,
         handler: (notes: List<Note>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query =
-            "SELECT `id`, `title`, `text`, `last_modified`, `status`, `favorite` FROM `${getTablePrefix() + tableName}` WHERE (`title` LIKE '%query%' OR `text` LIKE '%query%') AND `user_id` = ? ORDER BY `id` DESC"
+        val sqlQuery =
+            "SELECT `id`, `title`, `text`, `last_modified`, `status`, `favorite` FROM `${getTablePrefix() + tableName}` WHERE (`title` LIKE ? OR `text` LIKE ?) AND `user_id` = ? ORDER BY `id` DESC"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(query).add(query).add(userID)) { queryResult ->
+        sqlConnection.queryWithParams(
+            sqlQuery,
+            JsonArray().add("%$query%").add("%$query%").add(userID)
+        ) { queryResult ->
             if (queryResult.succeeded()) {
                 val notes = mutableListOf<Note>()
 
@@ -234,7 +237,7 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                             noteInDB.getString(2),
                             noteInDB.getString(3),
                             noteInDB.getInteger(4),
-                            noteInDB.getBoolean(5)
+                            noteInDB.getInteger(5) == 1
                         )
                     )
                 }

@@ -43,10 +43,25 @@ class SearchAPI : LoggedInApi() {
                             return@closeConnection
                         }
 
+                        val convertedNotes = mutableListOf<Map<String, Any?>>()
+
+                        notes.forEach {
+                            convertedNotes.add(
+                                mapOf(
+                                    "id" to it.id,
+                                    "title" to it.title,
+                                    "text" to it.text,
+                                    "last_modified" to it.lastModified,
+                                    "status" to it.status,
+                                    "favorite" to it.favorite
+                                )
+                            )
+                        }
+
                         handler.invoke(
                             Successful(
                                 mapOf(
-                                    "note" to notes,
+                                    "notes" to convertedNotes,
                                 )
                             )
                         )

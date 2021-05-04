@@ -85,6 +85,24 @@ class ShareLinkDaoImpl(override val tableName: String = "share_link") : DaoImpl(
         }
     }
 
+    override fun getTokenIDByNoteID(
+        noteID: Int,
+        sqlConnection: SQLConnection,
+        handler: (tokenID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `token_id` FROM `${getTablePrefix() + tableName}` WHERE `note_id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(noteID)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val row = queryResult.result().results[0]
+
+                handler.invoke(row.getInteger(0), queryResult)
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
+
     override fun isLinkExistsByNoteID(
         noteID: Int,
         sqlConnection: SQLConnection,

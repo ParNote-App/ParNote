@@ -203,7 +203,7 @@ class NoteDaoImpl(override val tableName: String = "note") : DaoImpl(), NoteDao 
                     row.getString(3),
                     row.getString(4),
                     row.getInteger(5),
-                    row.getBoolean(6)
+                    row.getInteger(6) == 1
                 )
 
                 handler.invoke(note, queryResult)

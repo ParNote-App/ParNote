@@ -70,7 +70,13 @@ class GetShareLinkAPI : LoggedInApi() {
                                 handler.invoke(
                                     Successful(
                                         mapOf(
-                                            "note" to note,
+                                            "note" to mapOf(
+                                                "id" to note.id,
+                                                "title" to note.title,
+                                                "text" to note.text,
+                                                "last_modified" to note.lastModified,
+                                                "status" to note.status
+                                            ),
                                         )
                                     )
                                 )
